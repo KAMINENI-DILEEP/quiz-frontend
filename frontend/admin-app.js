@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://quiz-backend-lu8d.onrender.com/api';
+const API_BASE_URL = 'https://quiz-backend-azsp.onrender.com';
 let adminJwtToken = null;
 let currentQuestionIndex = 0;
 let isFetchingMetrics = false;
