@@ -33,72 +33,60 @@
                     </div>
                 </div>
 
+                <!-- Forgot Password Link trigger -->
+                <div style="text-align: right; margin-bottom: 1rem;">
+                    <button type="button" class="switch-auth-link" onclick="routeToView('vAdminForgotPassword')" style="font-size: 0.85rem;">Forgot Password?</button>
+                </div>
+
                 <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1.5rem; justify-content: space-between; flex-wrap: wrap;">
                     <div>
                         <button type="submit">Authorize Session</button>
                         <button type="button" class="btn-secondary" onclick="window.location.href='index.html'">Back to Student Login</button>
-                   <!-- Admin Password Recovery View -->
-<div id="adminForgotPasswordView" class="view" style="display: none; padding: 2rem;">
-    <div class="card" style="max-width: 400px; margin: auto;">
-        <h2>Admin Password Recovery</h2>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
-            Provide your administrative email address to recover your credentials.
-        </p>
-        
-        <form onsubmit="confirmPasswordReset(event)">
-            <div class="input-group" style="margin-bottom: 1rem;">
-                <label>Admin Email</label>
-                <input type="email" id="recoveryEmail" required placeholder="admin@domain.com" style="width: 100%; padding: 0.75rem;">
-            </div>
-
-            <button type="button" class="btn-secondary" onclick="requestPasswordResetOtp()" style="width: 100%; margin-bottom: 1rem;">
-                Send Recovery Code
-            </button>
-
-            <!-- OTP & New Password fields -->
-            <div id="recoveryOtpContainer" style="display: none;">
-                <label style="display: block; margin-bottom: 0.5rem;">Enter 6-Digit Code</label>
-                <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1rem;">
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
+                    </div>
                 </div>
-
-                <div class="input-group" style="margin-bottom: 1rem;">
-                    <label>New Password</label>
-                    <input type="password" id="newAccountPassword" required placeholder="New admin password" style="width: 100%; padding: 0.75rem;">
-                </div>
-
-                <button type="submit" class="btn-primary" style="width: 100%;">Update Admin Password</button>
-            </div>
-        </form>
-
-        <p style="text-align: center; margin-top: 1rem;">
-            <a href="admin.html" style="color: var(--primary);">Return to Admin Sign In</a>
-        </p>
-    </div>
-</div>
             </form>
         </div>
 
-        <!-- View: Admin Forgot Password Module -->
-        <div id="vAdminForgotPassword" class="view">
+        <!-- View: Admin Forgot Password Module with Split OTP Support -->
+        <div id="vAdminForgotPassword" class="view" style="display: none;">
             <h2>Admin Password Recovery</h2>
-            <div class="card">
-                <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.95rem;">Enter the administrative email to clear credentials security matrix paths.</p>
-                <form onsubmit="executeAdminPasswordResetRequest(event)">
+            <div class="card" style="max-width: 450px; margin: auto;">
+                <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.95rem;">Enter the administrative email address to dispatch and verify recovery tokens securely.</p>
+                
+                <form onsubmit="confirmPasswordReset(event)">
                     <div class="form-group">
                         <label>Admin Email Address</label>
-                        <input type="email" id="resetAdminEmailField" required placeholder="admin@edu.com">
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="email" id="recoveryEmail" required placeholder="admin@edu.com" style="flex-grow:1;">
+                            <button type="button" class="btn-secondary" onclick="requestPasswordResetOtp()" style="white-space:nowrap; padding: 0.85rem 1rem;">Send Code</button>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:1rem;">
-                        <button type="submit" class="btn-success">Dispatch Recovery</button>
-                        <button type="button" class="btn-secondary" onclick="routeToView('vAdminLogin')">Return</button>
+
+                    <!-- OTP & New Password fields (revealed after code is sent) -->
+                    <div id="recoveryOtpContainer" style="display: none; margin-top: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Enter 6-Digit Code</label>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;">
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <span class="otp-separator">-</span>
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>New Admin Password</label>
+                            <input type="password" id="newAccountPassword" required placeholder="Enter new admin password" style="width: 100%; padding: 0.75rem;">
+                        </div>
+
+                        <button type="submit" class="btn-success" style="width: 100%; margin-top: 1rem;">Update Admin Password</button>
                     </div>
                 </form>
+
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button type="button" class="btn-secondary" onclick="routeToView('vAdminLogin')" style="width: 100%;">Return to Admin Sign In</button>
+                </div>
             </div>
         </div>
 
@@ -306,7 +294,7 @@
                 <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Clear all local administrative session keys?</p>
                 <div style="display: flex; gap: 1rem; justify-content: center;">
                     <button onclick="confirmAdminLogout()" class="btn-danger" style="padding: 0.75rem 1.5rem;">Yes, Logout</button>
-                    <button onclick="closeAdminLogoutModal()" class="btn-secondary" style="padding: 0.75rem 1.5rem;">Cancel</i></button>
+                    <button onclick="closeAdminLogoutModal()" class="btn-secondary" style="padding: 0.75rem 1.5rem;">Cancel</button>
                 </div>
             </div>
         </div>
