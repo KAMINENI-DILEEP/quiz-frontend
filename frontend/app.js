@@ -1,4 +1,4 @@
-const API = "https://quiz-backend-lu8d.onrender.com/api";
+const API = "https://quiz-backend-azsp.onrender.com";
 let jwtToken = sessionStorage.getItem('token') || null;
 let clockInterval = null;
 let totalSecondsElapsed = 0;
