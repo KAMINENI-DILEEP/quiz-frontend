@@ -1,4 +1,4 @@
-const API = "https://quiz-backend-lu8d.onrender.com/api";
+const API = "https://quiz-backend-azsp.onrender.com/api";
 let adminJwtToken = sessionStorage.getItem('adminToken') || null;
 
 // Sub-16ms GPU View Router for Admin Portal
