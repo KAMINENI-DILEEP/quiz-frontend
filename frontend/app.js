@@ -1,4 +1,4 @@
-const API = "https://quiz-backend-azsp.onrender.com";
+const API = "https://quiz-backend-azsp.onrender.com/api";
 let jwtToken = sessionStorage.getItem('token') || null;
 let clockInterval = null;
 let totalSecondsElapsed = 0;
@@ -240,8 +240,11 @@ async function requestSignupEmailOtp() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
+        
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+
+        if (!res.ok) throw new Error(data.message || 'Failed to dispatch verification code.');
         alert(`Verification code dispatched to: ${email}`);
     } catch (err) { alert(err.message); }
 }
@@ -264,8 +267,11 @@ async function appRegister(e) {
                 otp: otpVal
             })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
+        
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+
+        if (!res.ok) throw new Error(data.message || 'Registration failed.');
         alert("Account registered successfully. Please sign in.");
         toggleAuthForms(false);
     } catch (err) { alert(err.message); }
@@ -294,7 +300,9 @@ async function appLogin(e, authMode = 'EMAIL') {
             body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+
         if (!res.ok) throw new Error(data.message || 'Login verification failed.');
 
         // Handle Two-Factor Authentication Challenge Trigger
