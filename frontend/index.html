@@ -45,6 +45,11 @@
                         </div>
                     </div>
 
+                    <!-- Forgot Password Link trigger -->
+                    <div style="text-align: right; margin-bottom: 1rem;">
+                        <button type="button" class="switch-auth-link" onclick="routeTo('vForgotPassword')" style="font-size: 0.85rem;">Forgot Password?</button>
+                    </div>
+
                     <!-- 2FA Split OTP Inputs (Appears dynamically if user has enabled 2FA) -->
                     <div class="form-group" id="mfaContainer" style="display:none; margin-top:1.5rem;">
                         <div class="otp-header">
@@ -62,50 +67,11 @@
                             <input type="text" maxlength="1" class="otp-box mfa-box" id="mfa_5">
                         </div>
                     </div>
-<!-- Forgot Password Modal / Section -->
-<div id="forgotPasswordModal" class="view" style="display: none; padding: 2rem;">
-    <div class="card" style="max-width: 400px; margin: auto;">
-        <h2>Password Recovery</h2>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
-            Enter your registered email address to receive a 6-digit recovery code.
-        </p>
-        
-        <form onsubmit="confirmPasswordReset(event)">
-            <div class="input-group" style="margin-bottom: 1rem;">
-                <label>Email Address</label>
-                <input type="email" id="recoveryEmail" required placeholder="Enter your email" style="width: 100%; padding: 0.75rem;">
-            </div>
 
-            <button type="button" class="btn-secondary" onclick="requestPasswordResetOtp()" style="width: 100%; margin-bottom: 1rem;">
-                Send Recovery Code
-            </button>
+                    <div style="margin-top:1.5rem; margin-bottom:1.5rem;">
+                        <button type="submit" id="btnLoginSubmit" class="btn-continue-style" style="width:100%;">Sign In</button>
+                    </div>
 
-            <!-- OTP & New Password fields (hidden initially) -->
-            <div id="recoveryOtpContainer" style="display: none;">
-                <label style="display: block; margin-bottom: 0.5rem;">Enter 6-Digit Code</label>
-                <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1rem;">
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
-                    <input type="text" maxlength="1" class="recovery-otp-box" style="width: 40px; height: 40px; text-align: center; font-size: 1.2rem;" />
-                </div>
-
-                <div class="input-group" style="margin-bottom: 1rem;">
-                    <label>New Password</label>
-                    <input type="password" id="newAccountPassword" required placeholder="Enter new password" style="width: 100%; padding: 0.75rem;">
-                </div>
-
-                <button type="submit" class="btn-primary" style="width: 100%;">Reset Password</button>
-            </div>
-        </form>
-
-        <p style="text-align: center; margin-top: 1rem;">
-            <a href="#" onclick="routeTo('vAuthSpace'); return false;" style="color: var(--primary);">Back to Sign In</a>
-        </p>
-    </div>
-</div>
                     <div style="text-align:center; margin-top:1rem;">
                         <button type="button" class="switch-auth-link" onclick="toggleSignInMethod('MOBILE')">
                             Login with PHONE NUMBER
@@ -236,20 +202,46 @@
             </div>
         </div>
 
-        <!-- View: Self-Service Password Reset Window -->
-        <div id="vForgotPassword" class="view">
+        <!-- View: Self-Service Password Reset Window with Split OTP Support -->
+        <div id="vForgotPassword" class="view" style="display: none;">
             <h2>Account Credential Recovery</h2>
-            <div class="card">
-                <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.95rem;">Enter your profile address
-                    to route recovery authorization tokens securely.</p>
-                <form onsubmit="executePasswordResetRequest(event)">
-                    <div class="form-group"><label>Registered Email Address</label><input type="email"
-                            id="resetEmailField" required placeholder="john@edu.com"></div>
-                    <div style="display:flex; gap:1rem;">
-                        <button type="submit" class="btn-success">Dispatch Code</button>
-                        <button type="button" class="btn-secondary" onclick="routeTo('vAuthSpace')">Return to Login</button>
+            <div class="card" style="max-width: 450px; margin: auto;">
+                <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.95rem;">Enter your profile email address to dispatch and verify recovery tokens securely.</p>
+                
+                <form onsubmit="confirmPasswordReset(event)">
+                    <div class="form-group">
+                        <label>Registered Email Address</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="email" id="recoveryEmail" required placeholder="john@edu.com" style="flex-grow:1;">
+                            <button type="button" class="btn-secondary" onclick="requestPasswordResetOtp()" style="white-space:nowrap; padding: 0.85rem 1rem;">Send Code</button>
+                        </div>
+                    </div>
+
+                    <!-- OTP & New Password fields (revealed after code is sent) -->
+                    <div id="recoveryOtpContainer" style="display: none; margin-top: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Enter 6-Digit Code</label>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;">
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <span class="otp-separator">-</span>
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>New System Password</label>
+                            <input type="password" id="newAccountPassword" required placeholder="Enter new password" style="width: 100%; padding: 0.75rem;">
+                        </div>
+
+                        <button type="submit" class="btn-success" style="width: 100%; margin-top: 1rem;">Reset Password</button>
                     </div>
                 </form>
+
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button type="button" class="btn-secondary" onclick="routeTo('vAuthSpace')" style="width: 100%;">Return to Login</button>
+                </div>
             </div>
         </div>
 
@@ -268,7 +260,7 @@
             <div id="examList" style="margin-top: 1rem;"></div>
         </div>
 
-        <!-- View: Student Profile Settings (Includes Metadata, Password Change & 2FA Toggle) -->
+        <!-- View: Student Profile Settings -->
         <div id="vStudentProfile" class="view">
             <div class="navbar">
                 <h2>Student Profile Management</h2>
@@ -276,7 +268,6 @@
             </div>
 
             <div class="profile-layout-container">
-                <!-- Section 1: General Info -->
                 <form onsubmit="updateStudentGeneralMetadata(event)" class="profile-section-card">
                     <div class="profile-section-title">General Information Parameters</div>
                     <div class="form-group"><label>Full Name</label><input type="text" id="profStudentName" required></div>
@@ -285,7 +276,6 @@
                     <button type="submit" class="btn-success">Save General Details</button>
                 </form>
 
-                <!-- Section 2: 2FA Toggle Setting -->
                 <div class="profile-section-card card" style="margin-top: 1.5rem;">
                     <div class="profile-section-title">Security & Two-Factor Authentication</div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem;">
@@ -302,7 +292,6 @@
                     </div>
                 </div>
 
-                <!-- Section 3: Password Update -->
                 <form onsubmit="updateStudentPasswordSecurityMetric(event)" class="profile-section-card" style="margin-top: 1.5rem;">
                     <div class="profile-section-title">Change Account Access Password</div>
                     <div class="form-group">
