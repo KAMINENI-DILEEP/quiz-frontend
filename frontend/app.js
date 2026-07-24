@@ -241,13 +241,14 @@ async function requestSignupEmailOtp() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+        if (!res.ok) throw new Error(data.message || 'Request failed.');
         alert(`Verification code dispatched to: ${email}`);
     } catch (err) { alert(err.message); }
 }
 
-// Request Password Reset Code via Email (Supports Users & Admins)
+// Request Password Reset Code via Email with Safe JSON Parsing
 async function requestPasswordResetOtp() {
     const email = document.getElementById('recoveryEmail').value;
     if (!email) {
@@ -268,7 +269,6 @@ async function requestPasswordResetOtp() {
         if (!res.ok) throw new Error(data.message || 'Failed to dispatch recovery code.');
         alert(`Recovery code dispatched to: ${email}`);
         
-        // Reveal the OTP boxes and new password input fields dynamically
         const otpContainer = document.getElementById('recoveryOtpContainer');
         if (otpContainer) {
             otpContainer.style.display = 'block';
@@ -302,7 +302,14 @@ async function confirmPasswordReset(e) {
 
         if (!res.ok) throw new Error(data.message || 'Password reset failed.');
         alert("Password updated successfully. Please sign in with your new credentials.");
-        routeTo('vAuthSpace');
+        
+        if (typeof routeTo === 'function') {
+            routeTo('vAuthSpace');
+        } else if (typeof routeToView === 'function') {
+            routeToView('vAdminLogin');
+        } else {
+            location.reload();
+        }
     } catch (err) {
         alert(err.message);
     }
@@ -326,8 +333,9 @@ async function appRegister(e) {
                 otp: otpVal
             })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+        if (!res.ok) throw new Error(data.message || 'Registration failed.');
         alert("Account registered successfully. Please sign in.");
         toggleAuthForms(false);
     } catch (err) { alert(err.message); }
@@ -356,7 +364,8 @@ async function appLogin(e, authMode = 'EMAIL') {
             body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
         if (!res.ok) throw new Error(data.message || 'Login verification failed.');
 
         // Handle Two-Factor Authentication Challenge Trigger
@@ -577,7 +586,8 @@ async function updateStudentGeneralMetadata(e) {
                 mobileNumber: document.getElementById('profStudentMobile').value
             })
         });
-        const data = await res.json();
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
         if (!res.ok) throw new Error(data.message || 'Profile updates rejected.');
         alert('General profile updates saved successfully.');
         document.getElementById('usrName').innerText = document.getElementById('profStudentName').value;
@@ -599,7 +609,8 @@ async function updateStudentPasswordSecurityMetric(e) {
                 newPassword: document.getElementById('profStudentNewPassword').value
             })
         });
-        const data = await res.json();
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
         if (!res.ok) throw new Error(data.message || 'Password update rejected.');
         alert('Password modified successfully.');
         e.target.reset();
@@ -617,8 +628,9 @@ async function toggleMfaSetting(enabled) {
             },
             body: JSON.stringify({ mfaEnabled: enabled })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+        if (!res.ok) throw new Error(data.message || 'Toggle failed.');
         alert(`Two-Factor Authentication is now ${enabled ? 'ENABLED' : 'DISABLED'}.`);
     } catch (err) { alert(err.message); }
 }
