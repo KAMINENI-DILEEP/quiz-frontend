@@ -46,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupOtpInputInteractions();
     bindOtpGroupInteractions('.reg-box');
     bindOtpGroupInteractions('.mfa-box');
+    bindOtpGroupInteractions('.recovery-otp-box');
 });
 
 // ==========================================================================
@@ -229,7 +230,7 @@ function processMobileAuthSequence() {
     }
 }
 
-// Request Email Verification OTP during Signup (Fixed Syntax)
+// Request Email Verification OTP during Signup
 async function requestSignupEmailOtp() {
     const email = document.getElementById('regEmail').value;
     if (!email) {
@@ -249,6 +250,64 @@ async function requestSignupEmailOtp() {
 
         if (!res.ok) throw new Error(data.message || 'Failed to dispatch verification code.');
         alert(`Verification code dispatched to: ${email}`);
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+// Request Password Reset Code via Email (Supports Users & Admins)
+async function requestPasswordResetOtp() {
+    const email = document.getElementById('recoveryEmail').value;
+    if (!email) {
+        alert("Please enter your email address.");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API}/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+
+        if (!res.ok) throw new Error(data.message || 'Failed to dispatch recovery code.');
+        alert(`Recovery code dispatched to: ${email}`);
+        
+        const otpContainer = document.getElementById('recoveryOtpContainer');
+        if (otpContainer) otpContainer.style.display = 'block';
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+// Complete Password Reset with Email & OTP
+async function confirmPasswordReset(e) {
+    if (e) e.preventDefault();
+    const email = document.getElementById('recoveryEmail').value;
+    const otp = getOtpValue('.recovery-otp-box');
+    const newPassword = document.getElementById('newAccountPassword').value;
+
+    if (!email || otp.length !== 6 || !newPassword) {
+        alert("Please provide your email, the 6-digit verification code, and your new password.");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API}/reset-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, otp, newPassword })
+        });
+        
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+
+        if (!res.ok) throw new Error(data.message || 'Password reset failed.');
+        alert("Password updated successfully. Please sign in with your new credentials.");
+        location.reload();
     } catch (err) {
         alert(err.message);
     }
