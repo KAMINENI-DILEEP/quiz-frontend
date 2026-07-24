@@ -232,7 +232,9 @@ function processMobileAuthSequence() {
 // Request Email Verification OTP during Signup
 async function requestSignupEmailOtp() {
     const email = document.getElementById('regEmail').value;
-    if (!email) { alert("Please enter an email address first."); return; }
+    if (!email) { alert("Please enter an email address first.");
+                 
+                }return;
 
     try {
         const res = await fetch(`${API}/send-email-otp`, { ... });, {
