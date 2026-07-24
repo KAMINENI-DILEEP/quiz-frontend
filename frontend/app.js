@@ -1,4 +1,4 @@
-const API = "https://quiz-backend-azsp.onrender.com/api";
+const API = "https://quiz-backend-lu8d.onrender.com/api";
 let jwtToken = sessionStorage.getItem('token') || null;
 let clockInterval = null;
 let totalSecondsElapsed = 0;
@@ -233,10 +233,7 @@ function processMobileAuthSequence() {
 // Request Email Verification OTP during Signup
 async function requestSignupEmailOtp() {
     const email = document.getElementById('regEmail').value;
-    if (!email) {
-        alert("Please enter an email address first.");
-        return;
-    }
+    if (!email) { alert("Please enter an email address first."); return; }
 
     try {
         const res = await fetch(`${API}/send-email-otp`, {
@@ -244,15 +241,10 @@ async function requestSignupEmailOtp() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
         });
-        
-        const text = await res.text();
-        const data = text ? JSON.parse(text) : {};
-
-        if (!res.ok) throw new Error(data.message || 'Failed to dispatch verification code.');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
         alert(`Verification code dispatched to: ${email}`);
-    } catch (err) {
-        alert(err.message);
-    }
+    } catch (err) { alert(err.message); }
 }
 
 // Request Password Reset Code via Email (Supports Users & Admins)
@@ -276,14 +268,17 @@ async function requestPasswordResetOtp() {
         if (!res.ok) throw new Error(data.message || 'Failed to dispatch recovery code.');
         alert(`Recovery code dispatched to: ${email}`);
         
+        // Reveal the OTP boxes and new password input fields dynamically
         const otpContainer = document.getElementById('recoveryOtpContainer');
-        if (otpContainer) otpContainer.style.display = 'block';
+        if (otpContainer) {
+            otpContainer.style.display = 'block';
+        }
     } catch (err) {
         alert(err.message);
     }
 }
 
-// Complete Password Reset with Email & OTP
+// Complete Password Reset with Email & Split OTP Code
 async function confirmPasswordReset(e) {
     if (e) e.preventDefault();
     const email = document.getElementById('recoveryEmail').value;
@@ -307,7 +302,7 @@ async function confirmPasswordReset(e) {
 
         if (!res.ok) throw new Error(data.message || 'Password reset failed.');
         alert("Password updated successfully. Please sign in with your new credentials.");
-        location.reload();
+        routeTo('vAuthSpace');
     } catch (err) {
         alert(err.message);
     }
@@ -331,11 +326,8 @@ async function appRegister(e) {
                 otp: otpVal
             })
         });
-        
-        const text = await res.text();
-        const data = text ? JSON.parse(text) : {};
-
-        if (!res.ok) throw new Error(data.message || 'Registration failed.');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
         alert("Account registered successfully. Please sign in.");
         toggleAuthForms(false);
     } catch (err) { alert(err.message); }
@@ -364,9 +356,7 @@ async function appLogin(e, authMode = 'EMAIL') {
             body: JSON.stringify(payload)
         });
 
-        const text = await res.text();
-        const data = text ? JSON.parse(text) : {};
-
+        const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Login verification failed.');
 
         // Handle Two-Factor Authentication Challenge Trigger
