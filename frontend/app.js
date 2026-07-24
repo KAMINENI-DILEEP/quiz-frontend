@@ -229,15 +229,16 @@ function processMobileAuthSequence() {
     }
 }
 
-// Request Email Verification OTP during Signup
+// Request Email Verification OTP during Signup (Fixed Syntax)
 async function requestSignupEmailOtp() {
     const email = document.getElementById('regEmail').value;
-    if (!email) { alert("Please enter an email address first.");
-                 
-                return;
+    if (!email) {
+        alert("Please enter an email address first.");
+        return;
+    }
 
     try {
-        const res = await fetch(`${API}/send-email-otp`, { ... });, {
+        const res = await fetch(`${API}/send-email-otp`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
@@ -248,7 +249,9 @@ async function requestSignupEmailOtp() {
 
         if (!res.ok) throw new Error(data.message || 'Failed to dispatch verification code.');
         alert(`Verification code dispatched to: ${email}`);
-    } catch (err) { alert(err.message); }
+    } catch (err) {
+        alert(err.message);
+    }
 }
 
 // Complete Profile Registration with OTP Verification
