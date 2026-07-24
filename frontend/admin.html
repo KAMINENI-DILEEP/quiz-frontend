@@ -33,16 +33,14 @@
                     </div>
                 </div>
 
-                <!-- Forgot Password Link trigger -->
-                <div style="text-align: right; margin-bottom: 1rem;">
-                    <button type="button" class="switch-auth-link" onclick="routeToView('vAdminForgotPassword')" style="font-size: 0.85rem;">Forgot Password?</button>
+                <!-- Action Row: Compact Authorize Button & Forgot Password link side-by-side -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; margin-bottom: 1.5rem; gap: 1rem;">
+                    <button type="submit" style="width: auto; padding: 0.75rem 2rem;">Authorize Session</button>
+                    <button type="button" class="switch-auth-link" onclick="routeToView('vAdminForgotPassword')" style="font-size: 0.9rem; background: none; border: none; cursor: pointer;">Forgot Password?</button>
                 </div>
 
-                <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1.5rem; justify-content: space-between; flex-wrap: wrap;">
-                    <div>
-                        <button type="submit">Authorize Session</button>
-                        <button type="button" class="btn-secondary" onclick="window.location.href='index.html'">Back to Student Login</button>
-                    </div>
+                <div style="text-align: left; margin-top: 1rem;">
+                    <button type="button" class="btn-secondary" onclick="window.location.href='index.html'">Back to Student Login</button>
                 </div>
             </form>
         </div>
