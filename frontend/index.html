@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Gateway</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div id="errBlock" class="err"></div>
+
+        <!-- View 1: Auth Workspace -->
+        <div id="vAuthSpace" class="view active">
+
+            <!-- CARD PART A: EMAIL ENTRY CHANNEL VIEW (DEFAULT) -->
+            <div id="authSignInCard">
+                <h2>Candidate Sign In Gateway</h2>
+                <form onsubmit="appLogin(event, 'EMAIL')">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <div style="position:relative; display:flex; align-items:center;">
+                            <i data-lucide="mail"
+                                style="position:absolute; left:0.85rem; pointer-events:none; color:var(--text-muted);"></i>
+                            <input type="email" id="email" required placeholder="Enter your email address"
+                                style="padding-left:2.5rem; width: 100%;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="password-wrapper"
+                            style="position:relative; display:flex; align-items:center; width:100%;">
+                            <i data-lucide="lock"
+                                style="position:absolute; left:0.85rem; z-index:5; pointer-events:none; color:var(--text-muted);"></i>
+                            <input type="password" id="password" required placeholder="Enter your password"
+                                style="padding-left:2.5rem; width: 100%;">
+                            <button type="button" class="password-toggle-btn"
+                                onclick="togglePasswordDisplay('password')">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2FA Split OTP Inputs (Appears dynamically if user has enabled 2FA) -->
+                    <div class="form-group" id="mfaContainer" style="display:none; margin-top:1.5rem;">
+                        <div class="otp-header">
+                            <span class="security-tag">TWO-FACTOR AUTHENTICATION</span>
+                            <label style="margin-top:0.25rem;">Enter 6-Digit Verification Code</label>
+                            <p class="subtext">A security code was sent to your registered email.</p>
+                        </div>
+                        <div class="otp-container" id="mfaOtpContainer">
+                            <input type="text" maxlength="1" class="otp-box mfa-box" id="mfa_0">
+                            <input type="text" maxlength="1" class="otp-box mfa-box" id="mfa_1">
+                            <input type="text" maxlength="1" class="otp-box mfa-box" id="mfa_2">
+                            <span class="otp-separator">-</span>
+                            <input type="text" maxlength="1" class="otp-box mfa-box" id="mfa_3">
+                            <input type="text" maxlength="1" class="otp-box mfa-box" id="mfa_4">
+                            <input type="text" maxlength="1" class="otp-box mfa-box" id="mfa_5">
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <button type="submit" id="btnLoginSubmit" class="btn-continue-style">Sign In</button>
+                        <button type="button" class="btn-outline" style="padding:0.5rem 1rem; font-size:0.9rem;"
+                            onclick="routeTo('vForgotPassword')">Forgot Password?</button>
+                    </div>
+                    <div style="text-align:center; margin-top:1rem;">
+                        <button type="button" class="switch-auth-link" onclick="toggleSignInMethod('MOBILE')">
+                            Login with PHONE NUMBER
+                        </button>
+                    </div>
+                </form>
+
+                <div class="auth-switch-footer">
+                    <span class="auth-switch-msg">New candidate entry?</span>
+                    <button type="button" class="btn-secondary" onclick="toggleAuthForms(true)">Create Account</button>
+                    <button type="button" class="btn-outline" onclick="window.location.href='admin.html'">Admin View</button>
+                </div>
+            </div>
+
+            <!-- CARD PART B: MOBILE NO + 6-DIGIT OTP ENTRY CHANNEL VIEW -->
+            <div id="authMobileSignInCard" style="display:none;">
+                <h2>Candidate Sign In Gateway</h2>
+                <form onsubmit="event.preventDefault(); processMobileAuthSequence();">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <div class="phone-input-container">
+                            <div class="flag-prefix-box">
+                                <span class="flag-emoji">🇮🇳</span>
+                                <span class="prefix-text">+91</span>
+                                <i data-lucide="chevron-down" style="width:14px; color:var(--text-muted);"></i>
+                            </div>
+                            <input type="text" id="loginMobileNo" required placeholder="Enter phone number"
+                                maxlength="10" pattern="\d{10}">
+                        </div>
+                    </div>
+
+                    <!-- Cyberpunk Split OTP Section for Mobile -->
+                    <div class="form-group" id="otpEntryContainer" style="display:none; margin-top:1.5rem;">
+                        <div class="otp-header">
+                            <span class="security-tag">SECURITY CHECK</span>
+                            <label style="margin-top:0.25rem;">Enter your code</label>
+                            <p class="subtext">We sent a 6-digit code to verify your account.</p>
+                        </div>
+
+                        <div class="otp-container" id="otpContainer">
+                            <input type="text" maxlength="1" class="otp-box" id="otp_0" autofocus>
+                            <input type="text" maxlength="1" class="otp-box" id="otp_1">
+                            <input type="text" maxlength="1" class="otp-box" id="otp_2">
+                            <span class="otp-separator">-</span>
+                            <input type="text" maxlength="1" class="otp-box" id="otp_3">
+                            <input type="text" maxlength="1" class="otp-box" id="otp_4">
+                            <input type="text" maxlength="1" class="otp-box" id="otp_5">
+                        </div>
+
+                        <div class="status-msg" id="status-msg">
+                            <span class="dot"></span> <span id="status-text">Enter the 6-digit code</span>
+                        </div>
+                        <p class="tip">Tip: paste to fill every box at once.</p>
+                    </div>
+
+                    <div style="margin-top:1.5rem; margin-bottom:1.5rem;">
+                        <button type="submit" id="btnSubmitMobileAuth" class="btn-continue-style"
+                            style="width:100%;">Continue</button>
+                    </div>
+
+                    <div style="text-align:center; margin-top:1rem;">
+                        <button type="button" class="switch-auth-link" onclick="toggleSignInMethod('EMAIL')">Login with Email</button>
+                    </div>
+                </form>
+
+                <div class="auth-switch-footer">
+                    <span class="auth-switch-msg">New candidate entry?</span>
+                    <button type="button" class="btn-secondary" onclick="toggleAuthForms(true)">Create Account</button>
+                </div>
+            </div>
+
+            <!-- CARD PART C: REGISTRATION FORM MATRIX WITH EMAIL OTP VERIFICATION -->
+            <div id="authSignUpCard" style="display:none;">
+                <h2>Create Candidate Account</h2>
+                <form onsubmit="appRegister(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="regName" required placeholder="John Doe">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="email" id="regEmail" required placeholder="john@edu.com" style="flex-grow:1;">
+                            <button type="button" class="btn-secondary" onclick="requestSignupEmailOtp()" style="white-space:nowrap; padding: 0.85rem 1rem;">Send Code</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mobile Number (10 digits)</label>
+                        <input type="text" id="regMobile" required placeholder="9876543210" maxlength="10" pattern="\d{10}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="regPassword" required placeholder="••••••••">
+                            <button type="button" class="password-toggle-btn"
+                                onclick="togglePasswordDisplay('regPassword')">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cyberpunk Split OTP Section for Signup Email Verification -->
+                    <div class="form-group" id="signupOtpContainer" style="margin-top:1.5rem;">
+                        <div class="otp-header">
+                            <span class="security-tag">EMAIL VERIFICATION</span>
+                            <p class="subtext">Enter 6-digit code dispatched to your email address.</p>
+                        </div>
+                        <div class="otp-container" id="regOtpContainer">
+                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_0">
+                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_1">
+                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_2">
+                            <span class="otp-separator">-</span>
+                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_3">
+                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_4">
+                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_5">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-success" style="width:100%; margin-top:1rem;">Register Profile</button>
+                </form>
+                <div class="auth-switch-footer">
+                    <span class="auth-switch-msg">Already registered?</span>
+                    <button type="button" class="btn-secondary" onclick="toggleAuthForms(false)">Sign In Gateway</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Self-Service Password Reset Window -->
+        <div id="vForgotPassword" class="view">
+            <h2>Account Credential Recovery</h2>
+            <div class="card">
+                <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.95rem;">Enter your profile address
+                    to route recovery authorization tokens securely.</p>
+                <form onsubmit="executePasswordResetRequest(event)">
+                    <div class="form-group"><label>Registered Email Address</label><input type="email"
+                            id="resetEmailField" required placeholder="john@edu.com"></div>
+                    <div style="display:flex; gap:1rem;">
+                        <button type="submit" class="btn-success">Dispatch Code</button>
+                        <button type="button" class="btn-secondary" onclick="routeTo('vAuthSpace')">Return to Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- View 2: Student Dashboard -->
+        <div id="vDash" class="view">
+            <div class="navbar">
+                <h2>Student Portal Space</h2>
+                <div>
+                    <button onclick="openStudentProfileSettings()" class="btn-success">Profile Settings</button>
+                    <button onclick="openLogoutModal()" class="btn-secondary">Logout Session</button>
+                </div>
+            </div>
+            <p style="margin: 1rem 0 1.5rem 0;">Welcome, <span id="usrName"
+                    style="font-weight:bold; color:var(--primary);"></span></p>
+            <h3>Your Assigned Exams</h3>
+            <div id="examList" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- View: Student Profile Settings (Includes Metadata, Password Change & 2FA Toggle) -->
+        <div id="vStudentProfile" class="view">
+            <div class="navbar">
+                <h2>Student Profile Management</h2>
+                <button onclick="showDashboardView()" class="btn-secondary">Back to Dashboard</button>
+            </div>
+
+            <div class="profile-layout-container">
+                <!-- Section 1: General Info -->
+                <form onsubmit="updateStudentGeneralMetadata(event)" class="profile-section-card">
+                    <div class="profile-section-title">General Information Parameters</div>
+                    <div class="form-group"><label>Full Name</label><input type="text" id="profStudentName" required></div>
+                    <div class="form-group"><label>Email Address</label><input type="email" id="profStudentEmail" required></div>
+                    <div class="form-group"><label>Mobile Number</label><input type="text" id="profStudentMobile" required maxlength="10"></div>
+                    <button type="submit" class="btn-success">Save General Details</button>
+                </form>
+
+                <!-- Section 2: 2FA Toggle Setting -->
+                <div class="profile-section-card card" style="margin-top: 1.5rem;">
+                    <div class="profile-section-title">Security & Two-Factor Authentication</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem;">
+                        <div>
+                            <strong>Require 2FA Code on Login</strong>
+                            <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.25rem;">
+                                Dispatches a 6-digit verification code to your email on every sign-in attempt.
+                            </p>
+                        </div>
+                        <label class="switch" style="position:relative; display:inline-block; width:50px; height:26px;">
+                            <input type="checkbox" id="mfaToggle" onchange="toggleMfaSetting(this.checked)" style="opacity:0; width:0; height:0;">
+                            <span class="slider round" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#1e2638; border:1px solid var(--border); transition:.3s; border-radius:34px;"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Section 3: Password Update -->
+                <form onsubmit="updateStudentPasswordSecurityMetric(event)" class="profile-section-card" style="margin-top: 1.5rem;">
+                    <div class="profile-section-title">Change Account Access Password</div>
+                    <div class="form-group">
+                        <label>Current Validation Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="profStudentCurrentPassword" required
+                                placeholder="Verify existing authentication key">
+                            <button type="button" class="password-toggle-btn"
+                                onclick="togglePasswordDisplay('profStudentCurrentPassword')">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>New System Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="profStudentNewPassword" required
+                                placeholder="Enter alternative access token">
+                            <button type="button" class="password-toggle-btn"
+                                onclick="togglePasswordDisplay('profStudentNewPassword')">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-danger">Update System Password</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- View 3: Exam Workspace -->
+        <div id="vExam" class="view">
+            <div class="navbar">
+                <h2 id="examTitle">Assessment View</h2>
+                <div id="clock"
+                    style="font-size:1.25rem; font-weight:800; background:rgba(255,69,0,0.2); padding:0.4rem 0.8rem; border-radius:6px; border:1px solid var(--primary);">
+                    00:00</div>
+            </div>
+            <form onsubmit="submitExamPayload(event)">
+                <div id="questionsContainer"></div>
+                <button type="submit" class="btn-danger" style="width:100%; margin-top:1.5rem;">Finish & Submit</button>
+            </form>
+        </div>
+
+        <!-- View 4: Grades Metric Frame -->
+        <div id="vResult" class="view">
+            <h2>Performance Grade Generated</h2>
+            <div class="card" style="text-align:center; margin-top:2rem;">
+                <p style="font-size:1.1rem; color:var(--text-muted)">Your Score Calculation</p>
+                <h1 id="scoreMetric" style="font-size:4rem; color:var(--success); margin:1rem 0;">0.00%</h1>
+                <p>Total time spent tracking: <span id="timeMetric" style="font-weight:bold;">0</span> seconds.</p>
+            </div>
+            <button onclick="showDashboardView()" style="width:100%; margin-top:1rem;">Back to Dashboard</button>
+        </div>
+
+        <!-- Logout Modal Overlay -->
+        <div id="logoutModalOverlay"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 15, 23, 0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
+            <div id="logoutModalCard"
+                style="background: var(--surface-card); border:1px solid var(--border); padding: 2.5rem; border-radius: 16px; box-shadow: var(--shadow); text-align: center; max-width: 400px; width: 90%; transform: scale(0.85); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                <h3 style="color: #ffffff; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 800;">Terminate Session?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Are you sure you want to exit your portal session?</p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button onclick="confirmApplicationLogout()" class="btn-danger"
+                        style="padding: 0.75rem 1.5rem;">Yes, Logout</button>
+                    <button onclick="closeLogoutModal()" class="btn-secondary"
+                        style="padding: 0.75rem 1.5rem;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js" defer></script>
+</body>
+
+</html>
