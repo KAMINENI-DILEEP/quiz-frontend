@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ChevronDown, AlertCircle, LogOut } from 'lucide-react';
 import './style.css';
 
-const API_BASE_URL = 'https://quiz-backend-lu8d.onrender.com/api';
+const API_BASE_URL = 'https://quiz-backend-azsp.onrender.com';
 const EXPECTED_MOCK_OTP = "123456";
 
 export default function App() {
