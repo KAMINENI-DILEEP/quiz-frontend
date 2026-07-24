@@ -235,7 +235,7 @@ async function requestSignupEmailOtp() {
     if (!email) { alert("Please enter an email address first."); return; }
 
     try {
-        const res = await fetch(`${API}/send-email-otp`, {
+        const res = await fetch(`${API}/send-email-otp`, { ... });, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
