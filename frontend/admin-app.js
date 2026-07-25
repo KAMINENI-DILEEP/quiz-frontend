@@ -322,5 +322,5 @@ function confirmAdminLogout() {
     adminJwtToken = null;
     sessionStorage.removeItem('adminToken');
     closeAdminLogoutModal();
-    routeToView('index.html');
+    routeToView('vAdminLogin');
 }
