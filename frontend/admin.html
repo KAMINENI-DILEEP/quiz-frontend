@@ -8,6 +8,18 @@
 
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+    function togglePasswordDisplay(fieldId, buttonElement) {
+        const passwordField = document.getElementById(fieldId);
+        if (!passwordField) return;
+        
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+        } else {
+            passwordField.type = "password";
+        }
+    }
+</script>
 </head>
 
 <body>
