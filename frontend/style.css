@@ -66,6 +66,48 @@ input:-webkit-autofill:active {
     max-width: 950px;
 }
 
+/* Portal Container & Card Layout Fixes */
+.portal-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+}
+
+.auth-footer-links {
+    margin-top: 1.5rem;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+}
+
+.auth-footer-links p {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.auth-footer-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-footer-links a:hover {
+    text-decoration: underline;
+}
+
 /* GPU Hardware-Accelerated View Switching (< 0.1s render time) */
 .view {
     display: none !important;
@@ -99,7 +141,7 @@ h2 {
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
 }
 
-.form-group {
+.form-group, .input-group {
     margin-bottom: 1.25rem;
     position: relative;
 }
@@ -278,7 +320,7 @@ input:checked + .slider:before {
 }
 
 /* Primary Buttons & Action Triggers */
-button, .btn-continue-style {
+button, .btn-primary, .btn-continue-style {
     background: var(--primary);
     color: #ffffff;
     border: none;
@@ -293,14 +335,15 @@ button, .btn-continue-style {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    width: 100%;
 }
 
-button:hover, .btn-continue-style:hover {
+button:hover, .btn-primary:hover, .btn-continue-style:hover {
     background: var(--primary-hover);
     box-shadow: 0 0 20px rgba(255, 85, 0, 0.7);
 }
 
-button:active, .btn-continue-style:active { 
+button:active, .btn-primary:active, .btn-continue-style:active { 
     transform: scale(0.97) !important; 
 }
 
@@ -358,6 +401,7 @@ button.switch-auth-link, .switch-auth-link {
     text-decoration: underline;
     padding: 0.25rem 0.5rem;
     display: inline-block;
+    width: auto;
 }
 
 button.switch-auth-link:hover, .switch-auth-link:hover {
@@ -397,7 +441,7 @@ button.switch-auth-link:hover, .switch-auth-link:hover {
     text-shadow: none; 
 }
 
-.card {
+.card, .stat-card {
     border: 1px solid var(--border);
     padding: 1.5rem;
     border-radius: 12px;
@@ -405,8 +449,25 @@ button.switch-auth-link:hover, .switch-auth-link:hover {
     background: var(--surface-card);
 }
 
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.dashboard-actions button {
+    flex: 1;
+}
+
 /* Error Banner Hide Fix */
-.err {
+.err, .error-banner {
     background: rgba(239, 68, 68, 0.15);
     color: #f87171;
     border: 1px solid rgba(239, 68, 68, 0.4);
