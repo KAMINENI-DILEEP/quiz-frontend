@@ -1,24 +1,6 @@
 const API = "https://quiz-backend-azsp.onrender.com/api";
 let adminJwtToken = sessionStorage.getItem('adminToken') || null;
 
-window.togglePasswordDisplay = function(fieldId, buttonElement) {
-    const passwordField = document.getElementById(fieldId);
-    if (!passwordField) return;
-    
-    if (passwordField.type === "password") {
-        passwordField.type = "text";
-        if (buttonElement) {
-            // If using text
-            buttonElement.textContent = "Hide";
-            // Or if you want to keep your Lucide icon, you can re-inject it or toggle its state here
-        }
-    } else {
-        passwordField.type = "password";
-        if (buttonElement) {
-            buttonElement.textContent = "Show";
-        }
-    }
-};
 // Sub-16ms GPU View Router for Admin Portal
 function routeToView(viewId) {
     requestAnimationFrame(() => {
