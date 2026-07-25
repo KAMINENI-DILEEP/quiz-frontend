@@ -180,8 +180,10 @@ async function loadAdminDashboardStats() {
             headers: { 'Authorization': `Bearer ${adminJwtToken}` }
         });
         const text = await res.text();
+        if (!res.ok) {
+            throw new Error(text || 'Failed to load stats');
+        }
         const data = text ? JSON.parse(text) : {};
-        if (!res.ok) throw new Error(data.message || 'Failed to load stats');
 
         document.getElementById('statTotalExams').innerText = data.totalExams || 0;
         document.getElementById('statTotalSubmissions').innerText = data.totalSubmissions || 0;
@@ -198,6 +200,9 @@ async function displayActiveExamsManagementList() {
             headers: { 'Authorization': `Bearer ${adminJwtToken}` }
         });
         const text = await res.text();
+        if (!res.ok) {
+            throw new Error(text || 'Failed to load exams list');
+        }
         const list = text ? JSON.parse(text) : [];
         
         const tbody = document.getElementById('managementExamsTableBody');
@@ -244,6 +249,9 @@ async function loadGlobalPerformanceTracker() {
             headers: { 'Authorization': `Bearer ${adminJwtToken}` }
         });
         const text = await res.text();
+        if (!res.ok) {
+            throw new Error(text || 'Failed to load performance tracker');
+        }
         const list = text ? JSON.parse(text) : [];
 
         const tbody = document.getElementById('scoresTableBody');
@@ -276,8 +284,12 @@ async function loadGlobalPerformanceTracker() {
 }
 
 // ==========================================================================
-// 3. DROPDOWN & SESSION CONTROL
+// 3. DROPDOWN, PROFILE & SESSION CONTROL
 // ==========================================================================
+
+function openAdminProfileSettings() {
+    console.log("Admin profile settings opened.");
+}
 
 function toggleAdminDropdownMenu(e) {
     if (e) e.stopPropagation();
