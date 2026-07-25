@@ -274,6 +274,16 @@ async function loadGlobalPerformanceTracker() {
         alert(err.message);
     }
 }
+        function togglePasswordDisplay(fieldId, buttonElement) {
+    const passwordField = document.getElementById(fieldId);
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        buttonElement.textContent = "Hide";
+    } else {
+        passwordField.type = "password";
+        buttonElement.textContent = "Show";
+    }
+}
 
 // ==========================================================================
 // 3. DROPDOWN & SESSION CONTROL
