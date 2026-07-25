@@ -1,7 +1,6 @@
 const API = "https://quiz-backend-azsp.onrender.com/api";
 let adminJwtToken = sessionStorage.getItem('adminToken') || null;
 
-// Sub-16ms GPU View Router for Admin Portal
 function routeToView(viewId) {
     requestAnimationFrame(() => {
         const views = document.querySelectorAll('.view');
@@ -23,29 +22,13 @@ function routeToView(viewId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Pre-warm backend HTTP connection on page load
     fetch(`${API}/ping`, { method: 'GET' }).catch(() => {});
-    
-    if (window.lucide) {
-        lucide.createIcons();
-    }
-    
-    // Bind split 6-digit OTP handlers for recovery
-    bindOtpGroupInteractions('.recovery-otp-box');
-
-    // If token exists, load admin dashboard by default
-    if (adminJwtToken) {
-        loadAdminDashboardStats();
-    }
+    if (window.lucide) lucide.createIcons();
+    if (adminJwtToken) loadAdminDashboardStats();
 });
-
-// ==========================================================================
-// 1. ADMIN AUTHENTICATION & PASSWORD RECOVERY
-// ==========================================================================
 
 async function executeAdminAuth(e) {
     if (e) e.preventDefault();
-    
     const email = document.getElementById('adminEmail').value;
     const password = document.getElementById('adminPassword').value;
 
@@ -79,45 +62,14 @@ async function executeAdminAuth(e) {
     }
 }
 
-// Request Password Reset Code via Email (Shared with Admin and Users)
-async function requestPasswordResetOtp() {
-    const email = document.getElementById('recoveryEmail').value;
-    if (!email) {
-        alert("Please enter your administrative email address.");
-        return;
-    }
-
-    try {
-        const res = await fetch(`${API}/forgot-password`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-        });
-        
-        const text = await res.text();
-        const data = text ? JSON.parse(text) : {};
-
-        if (!res.ok) throw new Error(data.message || 'Failed to dispatch recovery code.');
-        alert(`Recovery code dispatched to: ${email}`);
-        
-        const otpContainer = document.getElementById('recoveryOtpContainer');
-        if (otpContainer) {
-            otpContainer.style.display = 'block';
-        }
-    } catch (err) {
-        alert(err.message);
-    }
-}
-
-// Complete Password Reset with Email & Split OTP Code
+// Direct Password Reset (No OTP Required)
 async function confirmPasswordReset(e) {
     if (e) e.preventDefault();
     const email = document.getElementById('recoveryEmail').value;
-    const otp = getOtpValue('.recovery-otp-box');
     const newPassword = document.getElementById('newAccountPassword').value;
 
-    if (!email || otp.length !== 6 || !newPassword) {
-        alert("Please provide your email, the 6-digit verification code, and your new password.");
+    if (!email || !newPassword) {
+        alert("Please provide your email and your new password.");
         return;
     }
 
@@ -125,7 +77,7 @@ async function confirmPasswordReset(e) {
         const res = await fetch(`${API}/reset-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, otp, newPassword })
+            body: JSON.stringify({ email, newPassword })
         });
         
         const text = await res.text();
@@ -139,40 +91,6 @@ async function confirmPasswordReset(e) {
     }
 }
 
-function getOtpValue(selector) {
-    return Array.from(document.querySelectorAll(selector)).map(b => b.value).join('');
-}
-
-function bindOtpGroupInteractions(selector) {
-    const boxes = document.querySelectorAll(selector);
-    boxes.forEach((box, index) => {
-        box.addEventListener('input', (e) => {
-            if (e.target.value.length === 1 && index < boxes.length - 1) {
-                boxes[index + 1].focus();
-            }
-        });
-        box.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                boxes[index - 1].focus();
-            }
-        });
-        box.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const text = e.clipboardData.getData('text').trim();
-            if (/^\d{6}$/.test(text)) {
-                text.split('').forEach((char, i) => {
-                    if (boxes[i]) boxes[i].value = char;
-                });
-                boxes[boxes.length - 1].focus();
-            }
-        });
-    });
-}
-
-// ==========================================================================
-// 2. ADMIN DASHBOARD METRICS & EXAM MANAGEMENT
-// ==========================================================================
-
 async function loadAdminDashboardStats() {
     routeToView('vAdminDash');
     try {
@@ -180,9 +98,7 @@ async function loadAdminDashboardStats() {
             headers: { 'Authorization': `Bearer ${adminJwtToken}` }
         });
         const text = await res.text();
-        if (!res.ok) {
-            throw new Error(text || 'Failed to load stats');
-        }
+        if (!res.ok) throw new Error(text || 'Failed to load stats');
         const data = text ? JSON.parse(text) : {};
 
         document.getElementById('statTotalExams').innerText = data.totalExams || 0;
@@ -200,9 +116,7 @@ async function displayActiveExamsManagementList() {
             headers: { 'Authorization': `Bearer ${adminJwtToken}` }
         });
         const text = await res.text();
-        if (!res.ok) {
-            throw new Error(text || 'Failed to load exams list');
-        }
+        if (!res.ok) throw new Error(text || 'Failed to load exams list');
         const list = text ? JSON.parse(text) : [];
         
         const tbody = document.getElementById('managementExamsTableBody');
@@ -249,9 +163,7 @@ async function loadGlobalPerformanceTracker() {
             headers: { 'Authorization': `Bearer ${adminJwtToken}` }
         });
         const text = await res.text();
-        if (!res.ok) {
-            throw new Error(text || 'Failed to load performance tracker');
-        }
+        if (!res.ok) throw new Error(text || 'Failed to load performance tracker');
         const list = text ? JSON.parse(text) : [];
 
         const tbody = document.getElementById('scoresTableBody');
@@ -283,30 +195,17 @@ async function loadGlobalPerformanceTracker() {
     }
 }
 
-// ==========================================================================
-// 3. DROPDOWN, PROFILE & SESSION CONTROL
-// ==========================================================================
-
-function openAdminProfileSettings() {
-    console.log("Admin profile settings opened.");
-}
-
+function openAdminProfileSettings() { console.log("Admin profile settings opened."); }
 function toggleAdminDropdownMenu(e) {
     if (e) e.stopPropagation();
     const menu = document.getElementById('adminDropdownMenuContent');
-    if (menu) {
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-    }
+    if (menu) menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
 }
-
 function closeAdminDropdownDirectly() {
     const menu = document.getElementById('adminDropdownMenuContent');
     if (menu) menu.style.display = 'none';
 }
-
-window.addEventListener('click', () => {
-    closeAdminDropdownDirectly();
-});
+window.addEventListener('click', () => { closeAdminDropdownDirectly(); });
 
 function openAdminLogoutModal() {
     const overlay = document.getElementById('adminLogoutModalOverlay');
@@ -319,7 +218,6 @@ function openAdminLogoutModal() {
         });
     }
 }
-
 function closeAdminLogoutModal() {
     const overlay = document.getElementById('adminLogoutModalOverlay');
     const card = document.getElementById('adminLogoutModalCard');
@@ -329,7 +227,6 @@ function closeAdminLogoutModal() {
         setTimeout(() => { overlay.style.display = 'none'; }, 150);
     }
 }
-
 function confirmAdminLogout() {
     adminJwtToken = null;
     sessionStorage.removeItem('adminToken');
