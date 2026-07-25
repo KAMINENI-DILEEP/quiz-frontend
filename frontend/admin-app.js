@@ -1,6 +1,7 @@
 const API = "https://quiz-backend-azsp.onrender.com/api";
 let adminJwtToken = sessionStorage.getItem('adminToken') || null;
 
+// Sub-16ms GPU View Router for Admin Portal
 function routeToView(viewId) {
     requestAnimationFrame(() => {
         const views = document.querySelectorAll('.view');
@@ -22,13 +23,26 @@ function routeToView(viewId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Pre-warm backend HTTP connection on page load
     fetch(`${API}/ping`, { method: 'GET' }).catch(() => {});
-    if (window.lucide) lucide.createIcons();
-    if (adminJwtToken) loadAdminDashboardStats();
+    
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+
+    // If token exists, load admin dashboard by default
+    if (adminJwtToken) {
+        loadAdminDashboardStats();
+    }
 });
+
+// ==========================================================================
+// 1. ADMIN AUTHENTICATION & PASSWORD RECOVERY
+// ==========================================================================
 
 async function executeAdminAuth(e) {
     if (e) e.preventDefault();
+    
     const email = document.getElementById('adminEmail').value;
     const password = document.getElementById('adminPassword').value;
 
@@ -91,6 +105,10 @@ async function confirmPasswordReset(e) {
     }
 }
 
+// ==========================================================================
+// 2. ADMIN DASHBOARD METRICS & EXAM MANAGEMENT
+// ==========================================================================
+
 async function loadAdminDashboardStats() {
     routeToView('vAdminDash');
     try {
@@ -98,7 +116,9 @@ async function loadAdminDashboardStats() {
             headers: { 'Authorization': `Bearer ${adminJwtToken}` }
         });
         const text = await res.text();
-        if (!res.ok) throw new Error(text || 'Failed to load stats');
+        if (!res.ok) {
+            throw new Error(text || 'Failed to load stats');
+        }
         const data = text ? JSON.parse(text) : {};
 
         document.getElementById('statTotalExams').innerText = data.totalExams || 0;
@@ -116,7 +136,9 @@ async function displayActiveExamsManagementList() {
             headers: { 'Authorization': `Bearer ${adminJwtToken}` }
         });
         const text = await res.text();
-        if (!res.ok) throw new Error(text || 'Failed to load exams list');
+        if (!res.ok) {
+            throw new Error(text || 'Failed to load exams list');
+        }
         const list = text ? JSON.parse(text) : [];
         
         const tbody = document.getElementById('managementExamsTableBody');
@@ -163,7 +185,9 @@ async function loadGlobalPerformanceTracker() {
             headers: { 'Authorization': `Bearer ${adminJwtToken}` }
         });
         const text = await res.text();
-        if (!res.ok) throw new Error(text || 'Failed to load performance tracker');
+        if (!res.ok) {
+            throw new Error(text || 'Failed to load performance tracker');
+        }
         const list = text ? JSON.parse(text) : [];
 
         const tbody = document.getElementById('scoresTableBody');
@@ -195,17 +219,30 @@ async function loadGlobalPerformanceTracker() {
     }
 }
 
-function openAdminProfileSettings() { console.log("Admin profile settings opened."); }
+// ==========================================================================
+// 3. DROPDOWN, PROFILE & SESSION CONTROL
+// ==========================================================================
+
+function openAdminProfileSettings() {
+    console.log("Admin profile settings opened.");
+}
+
 function toggleAdminDropdownMenu(e) {
     if (e) e.stopPropagation();
     const menu = document.getElementById('adminDropdownMenuContent');
-    if (menu) menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    if (menu) {
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
 }
+
 function closeAdminDropdownDirectly() {
     const menu = document.getElementById('adminDropdownMenuContent');
     if (menu) menu.style.display = 'none';
 }
-window.addEventListener('click', () => { closeAdminDropdownDirectly(); });
+
+window.addEventListener('click', () => {
+    closeAdminDropdownDirectly();
+});
 
 function openAdminLogoutModal() {
     const overlay = document.getElementById('adminLogoutModalOverlay');
@@ -218,6 +255,7 @@ function openAdminLogoutModal() {
         });
     }
 }
+
 function closeAdminLogoutModal() {
     const overlay = document.getElementById('adminLogoutModalOverlay');
     const card = document.getElementById('adminLogoutModalCard');
@@ -227,6 +265,7 @@ function closeAdminLogoutModal() {
         setTimeout(() => { overlay.style.display = 'none'; }, 150);
     }
 }
+
 function confirmAdminLogout() {
     adminJwtToken = null;
     sessionStorage.removeItem('adminToken');
