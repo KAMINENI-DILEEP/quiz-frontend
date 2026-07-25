@@ -274,14 +274,17 @@ async function loadGlobalPerformanceTracker() {
         alert(err.message);
     }
 }
-        function togglePasswordDisplay(fieldId, buttonElement) {
+
+function togglePasswordDisplay(fieldId, buttonElement) {
     const passwordField = document.getElementById(fieldId);
+    if (!passwordField) return;
+    
     if (passwordField.type === "password") {
         passwordField.type = "text";
-        buttonElement.textContent = "Hide";
+        if (buttonElement) buttonElement.textContent = "Hide";
     } else {
         passwordField.type = "password";
-        buttonElement.textContent = "Show";
+        if (buttonElement) buttonElement.textContent = "Show";
     }
 }
 
@@ -332,5 +335,5 @@ function confirmAdminLogout() {
     adminJwtToken = null;
     sessionStorage.removeItem('adminToken');
     closeAdminLogoutModal();
-    routeToView('vAdminLogin');
+    routeToView('index.html');
 }
