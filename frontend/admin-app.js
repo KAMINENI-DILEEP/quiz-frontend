@@ -1,6 +1,18 @@
 const API = "https://quiz-backend-azsp.onrender.com/api";
 let adminJwtToken = sessionStorage.getItem('adminToken') || null;
 
+window.togglePasswordDisplay = function(fieldId, buttonElement) {
+    const passwordField = document.getElementById(fieldId);
+    if (!passwordField) return;
+    
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        if (buttonElement) buttonElement.textContent = "Hide";
+    } else {
+        passwordField.type = "password";
+        if (buttonElement) buttonElement.textContent = "Show";
+    }
+};
 // Sub-16ms GPU View Router for Admin Portal
 function routeToView(viewId) {
     requestAnimationFrame(() => {
@@ -272,19 +284,6 @@ async function loadGlobalPerformanceTracker() {
         tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">No score submissions recorded.</td></tr>';
     } catch (err) {
         alert(err.message);
-    }
-}
-
-function togglePasswordDisplay(fieldId, buttonElement) {
-    const passwordField = document.getElementById(fieldId);
-    if (!passwordField) return;
-    
-    if (passwordField.type === "password") {
-        passwordField.type = "text";
-        if (buttonElement) buttonElement.textContent = "Hide";
-    } else {
-        passwordField.type = "password";
-        if (buttonElement) buttonElement.textContent = "Show";
     }
 }
 
