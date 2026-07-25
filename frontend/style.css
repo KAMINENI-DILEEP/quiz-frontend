@@ -48,26 +48,8 @@ input:-webkit-autofill:active {
     transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Base Layout Wrapper */
-.wrapper {
-    width: 100%;
-    max-width: 480px;
-    background: var(--surface);
-    padding: 2.5rem 2rem;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-    position: relative;
-}
-
-.wrapper:has(.data-table), 
-.wrapper:has(#dynamicQuestionsContainer), 
-.wrapper:has(.profile-layout-container) {
-    max-width: 950px;
-}
-
-/* Portal Container & Card Layout Fixes */
-.portal-container {
+/* Base Layout Wrapper & Portal Container Unified */
+.portal-container, .wrapper {
     width: 100%;
     max-width: 440px;
     background: var(--surface);
@@ -76,17 +58,26 @@ input:-webkit-autofill:active {
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     margin: auto;
+    position: relative;
 }
 
+.portal-container:has(.data-table), 
+.wrapper:has(.data-table),
+.portal-container:has(#dynamicQuestionsContainer), 
+.wrapper:has(#dynamicQuestionsContainer),
+.portal-container:has(.profile-layout-container),
+.wrapper:has(.profile-layout-container) {
+    max-width: 950px;
+}
+
+/* Inner auth-card flat styling to prevent double-boxing */
 .auth-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 2.5rem 2rem;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
     width: 100%;
-    max-width: 440px;
-    margin: 0 auto;
+    margin: 0;
 }
 
 .auth-footer-links {
