@@ -16,7 +16,7 @@
         <!-- View 1: Auth Workspace -->
         <div id="vAuthSpace" class="view active">
 
-            <!-- CARD PART A: EMAIL ENTRY CHANNEL VIEW (DEFAULT) -->
+            <!-- EMAIL ENTRY CHANNEL VIEW -->
             <div id="authSignInCard">
                 <h2>Candidate Sign In Gateway</h2>
                 <form onsubmit="appLogin(event, 'EMAIL')">
@@ -45,7 +45,7 @@
                         </div>
                     </div>
 
-                    <!-- 2FA Split OTP Inputs (Appears dynamically if user has enabled 2FA) -->
+                    <!-- 2FA Split OTP Inputs -->
                     <div class="form-group" id="mfaContainer" style="display:none; margin-top:1.5rem;">
                         <div class="otp-header">
                             <span class="security-tag">TWO-FACTOR AUTHENTICATION</span>
@@ -63,16 +63,9 @@
                         </div>
                     </div>
 
-                    <!-- Action Row: Compact Continue Button & Forgot Password link side-by-side -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; margin-bottom: 1.5rem; gap: 1rem;">
                         <button type="submit" id="btnLoginSubmit" class="btn-continue-style" style="width: auto; padding: 0.75rem 2rem;">Sign In</button>
                         <button type="button" class="switch-auth-link" onclick="routeTo('vForgotPassword')" style="font-size: 0.9rem; background: none; border: none; cursor: pointer;">Forgot Password?</button>
-                    </div>
-
-                    <div style="text-align:center; margin-top:1rem;">
-                        <button type="button" class="switch-auth-link" onclick="toggleSignInMethod('MOBILE')">
-                            Login with PHONE NUMBER
-                        </button>
                     </div>
                 </form>
 
@@ -83,64 +76,7 @@
                 </div>
             </div>
 
-            <!-- CARD PART B: MOBILE NO + 6-DIGIT OTP ENTRY CHANNEL VIEW -->
-            <div id="authMobileSignInCard" style="display:none;">
-                <h2>Candidate Sign In Gateway</h2>
-                <form onsubmit="event.preventDefault(); processMobileAuthSequence();">
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <div class="phone-input-container">
-                            <div class="flag-prefix-box">
-                                <span class="flag-emoji">🇮🇳</span>
-                                <span class="prefix-text">+91</span>
-                                <i data-lucide="chevron-down" style="width:14px; color:var(--text-muted);"></i>
-                            </div>
-                            <input type="text" id="loginMobileNo" required placeholder="Enter phone number"
-                                maxlength="10" pattern="\d{10}">
-                        </div>
-                    </div>
-
-                    <!-- Cyberpunk Split OTP Section for Mobile -->
-                    <div class="form-group" id="otpEntryContainer" style="display:none; margin-top:1.5rem;">
-                        <div class="otp-header">
-                            <span class="security-tag">SECURITY CHECK</span>
-                            <label style="margin-top:0.25rem;">Enter your code</label>
-                            <p class="subtext">We sent a 6-digit code to verify your account.</p>
-                        </div>
-
-                        <div class="otp-container" id="otpContainer">
-                            <input type="text" maxlength="1" class="otp-box" id="otp_0" autofocus>
-                            <input type="text" maxlength="1" class="otp-box" id="otp_1">
-                            <input type="text" maxlength="1" class="otp-box" id="otp_2">
-                            <span class="otp-separator">-</span>
-                            <input type="text" maxlength="1" class="otp-box" id="otp_3">
-                            <input type="text" maxlength="1" class="otp-box" id="otp_4">
-                            <input type="text" maxlength="1" class="otp-box" id="otp_5">
-                        </div>
-
-                        <div class="status-msg" id="status-msg">
-                            <span class="dot"></span> <span id="status-text">Enter the 6-digit code</span>
-                        </div>
-                        <p class="tip">Tip: paste to fill every box at once.</p>
-                    </div>
-
-                    <div style="margin-top:1.5rem; margin-bottom:1.5rem;">
-                        <button type="submit" id="btnSubmitMobileAuth" class="btn-continue-style"
-                            style="width: auto; padding: 0.75rem 2rem;">Continue</button>
-                    </div>
-
-                    <div style="text-align:center; margin-top:1rem;">
-                        <button type="button" class="switch-auth-link" onclick="toggleSignInMethod('EMAIL')">Login with Email</button>
-                    </div>
-                </form>
-
-                <div class="auth-switch-footer">
-                    <span class="auth-switch-msg">New candidate entry?</span>
-                    <button type="button" class="btn-secondary" onclick="toggleAuthForms(true)">Create Account</button>
-                </div>
-            </div>
-
-            <!-- CARD PART C: REGISTRATION FORM MATRIX WITH EMAIL OTP VERIFICATION -->
+            <!-- REGISTRATION FORM MATRIX (Mobile & OTP Removed) -->
             <div id="authSignUpCard" style="display:none;">
                 <h2>Create Candidate Account</h2>
                 <form onsubmit="appRegister(event)">
@@ -151,15 +87,7 @@
                     
                     <div class="form-group">
                         <label>Email Address</label>
-                        <div style="display:flex; gap:0.5rem;">
-                            <input type="email" id="regEmail" required placeholder="john@edu.com" style="flex-grow:1;">
-                            <button type="button" class="btn-secondary" onclick="requestSignupEmailOtp()" style="white-space:nowrap; padding: 0.85rem 1rem;">Send Code</button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Mobile Number (10 digits)</label>
-                        <input type="text" id="regMobile" required placeholder="9876543210" maxlength="10" pattern="\d{10}">
+                        <input type="email" id="regEmail" required placeholder="john@edu.com">
                     </div>
 
                     <div class="form-group">
@@ -173,23 +101,6 @@
                         </div>
                     </div>
 
-                    <!-- Cyberpunk Split OTP Section for Signup Email Verification -->
-                    <div class="form-group" id="signupOtpContainer" style="margin-top:1.5rem;">
-                        <div class="otp-header">
-                            <span class="security-tag">EMAIL VERIFICATION</span>
-                            <p class="subtext">Enter 6-digit code dispatched to your email address.</p>
-                        </div>
-                        <div class="otp-container" id="regOtpContainer">
-                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_0">
-                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_1">
-                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_2">
-                            <span class="otp-separator">-</span>
-                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_3">
-                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_4">
-                            <input type="text" maxlength="1" class="otp-box reg-box" id="reg_5">
-                        </div>
-                    </div>
-
                     <button type="submit" class="btn-success" style="width:100%; margin-top:1rem;">Register Profile</button>
                 </form>
                 <div class="auth-switch-footer">
@@ -199,41 +110,24 @@
             </div>
         </div>
 
-        <!-- View: Self-Service Password Reset Window with Split OTP Support -->
+        <!-- View: Self-Service Password Reset Window -->
         <div id="vForgotPassword" class="view" style="display: none;">
             <h2>Account Credential Recovery</h2>
             <div class="card" style="max-width: 450px; margin: auto;">
-                <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.95rem;">Enter your profile email address to dispatch and verify recovery tokens securely.</p>
+                <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.95rem;">Enter your profile email address to reset your password directly.</p>
                 
                 <form onsubmit="confirmPasswordReset(event)">
                     <div class="form-group">
                         <label>Registered Email Address</label>
-                        <div style="display:flex; gap:0.5rem;">
-                            <input type="email" id="recoveryEmail" required placeholder="john@edu.com" style="flex-grow:1;">
-                            <button type="button" class="btn-secondary" onclick="requestPasswordResetOtp()" style="white-space:nowrap; padding: 0.85rem 1rem;">Send Code</button>
-                        </div>
+                        <input type="email" id="recoveryEmail" required placeholder="john@edu.com" style="width: 100%;">
                     </div>
 
-                    <!-- OTP & New Password fields (revealed after code is sent) -->
-                    <div id="recoveryOtpContainer" style="display: none; margin-top: 1.5rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Enter 6-Digit Code</label>
-                        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;">
-                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
-                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
-                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
-                            <span class="otp-separator">-</span>
-                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
-                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
-                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
-                        </div>
-
-                        <div class="form-group">
-                            <label>New System Password</label>
-                            <input type="password" id="newAccountPassword" required placeholder="Enter new password" style="width: 100%; padding: 0.75rem;">
-                        </div>
-
-                        <button type="submit" class="btn-success" style="width: 100%; margin-top: 1rem;">Reset Password</button>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label>New System Password</label>
+                        <input type="password" id="newAccountPassword" required placeholder="Enter new password" style="width: 100%; padding: 0.75rem;">
                     </div>
+
+                    <button type="submit" class="btn-success" style="width: 100%; margin-top: 1rem;">Reset Password</button>
                 </form>
 
                 <div style="text-align: center; margin-top: 1.5rem;">
@@ -269,7 +163,6 @@
                     <div class="profile-section-title">General Information Parameters</div>
                     <div class="form-group"><label>Full Name</label><input type="text" id="profStudentName" required></div>
                     <div class="form-group"><label>Email Address</label><input type="email" id="profStudentEmail" required></div>
-                    <div class="form-group"><label>Mobile Number</label><input type="text" id="profStudentMobile" required maxlength="10"></div>
                     <button type="submit" class="btn-success">Save General Details</button>
                 </form>
 
