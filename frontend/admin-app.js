@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================================================
-// 1. ADMIN AUTHENTICATION & PASSWORD RECOVERY
+// 1. AUTHENTICATION (ADMIN & CANDIDATE) & PASSWORD RECOVERY
 // ==========================================================================
 
 async function executeAdminAuth(e) {
@@ -73,6 +73,59 @@ async function executeAdminAuth(e) {
             eb.innerText = err.message;
             eb.style.display = 'block';
         }
+    }
+}
+
+// Candidate Login Handler
+async function executeCandidateAuth(e) {
+    if (e) e.preventDefault();
+    const email = document.getElementById('candidateEmail').value;
+    const password = document.getElementById('candidatePassword').value;
+
+    try {
+        const res = await fetch(`${API}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, authMode: 'EMAIL' })
+        });
+
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+
+        if (!res.ok) throw new Error(data.message || 'Candidate authentication failed.');
+        
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('role', data.role);
+        
+        alert("Candidate login successful!");
+        window.location.href = "index.html"; // Redirect to candidate portal space
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+// Candidate Registration Handler (No OTP/Mobile required)
+async function executeCandidateRegister(e) {
+    if (e) e.preventDefault();
+    const name = document.getElementById('regFullName').value;
+    const email = document.getElementById('regEmail').value;
+    const passwordHash = document.getElementById('regPassword').value;
+
+    try {
+        const res = await fetch(`${API}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, passwordHash, role: 'STUDENT' })
+        });
+
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+
+        if (!res.ok) throw new Error(data.message || 'Registration failed.');
+        alert('Candidate account created successfully! Please sign in.');
+        routeToView('vCandidateLogin');
+    } catch (err) {
+        alert(err.message);
     }
 }
 
@@ -226,23 +279,6 @@ async function loadGlobalPerformanceTracker() {
 function openAdminProfileSettings() {
     console.log("Admin profile settings opened.");
 }
-
-function toggleAdminDropdownMenu(e) {
-    if (e) e.stopPropagation();
-    const menu = document.getElementById('adminDropdownMenuContent');
-    if (menu) {
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-    }
-}
-
-function closeAdminDropdownDirectly() {
-    const menu = document.getElementById('adminDropdownMenuContent');
-    if (menu) menu.style.display = 'none';
-}
-
-window.addEventListener('click', () => {
-    closeAdminDropdownDirectly();
-});
 
 function openAdminLogoutModal() {
     const overlay = document.getElementById('adminLogoutModalOverlay');
