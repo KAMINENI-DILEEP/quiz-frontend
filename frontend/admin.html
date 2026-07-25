@@ -9,113 +9,177 @@
 </head>
 <body>
 
-    <!-- Admin Login View -->
-    <div id="vAdminLogin" class="view active" style="display: block;">
-        <h2>Admin Portal Login</h2>
-        <div id="errBlock" style="display: none; color: red; margin-bottom: 1rem;"></div>
-        <form onsubmit="executeAdminAuth(event)">
-            <div class="input-group">
-                <label>Email Address</label>
-                <input type="email" id="adminEmail" required placeholder="admin@domain.com">
-            </div>
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="adminPassword" required placeholder="••••••••">
-            </div>
-            <button type="submit" class="btn-primary">Sign In</button>
-        </form>
-        <p style="margin-top: 1rem;">
-            <a href="#" onclick="routeToView('vPasswordReset')">Forgot Password?</a>
-        </p>
-    </div>
-
-    <!-- Direct Password Reset View (OTP & Mobile Removed) -->
-    <div id="vPasswordReset" class="view" style="display: none;">
-        <h2>Reset Password</h2>
-        <form onsubmit="confirmPasswordReset(event)">
-            <div class="input-group">
-                <label>Email Address</label>
-                <input type="email" id="recoveryEmail" required placeholder="Enter your email">
-            </div>
-            <div class="input-group">
-                <label>New Password</label>
-                <input type="password" id="newAccountPassword" required placeholder="Enter new password">
-            </div>
-            <button type="submit" class="btn-primary">Update Password</button>
-        </form>
-        <p style="margin-top: 1rem;">
-            <a href="#" onclick="routeToView('vAdminLogin')">Back to Login</a>
-        </p>
-    </div>
-
-    <!-- Admin Dashboard View -->
-    <div id="vAdminDash" class="view" style="display: none;">
-        <h2>Dashboard Overview</h2>
-        <div class="stats-container">
-            <div class="stat-card">
-                <h3>Total Exams</h3>
-                <p id="statTotalExams">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Total Submissions</h3>
-                <p id="statTotalSubmissions">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Average Score</h3>
-                <p id="statAverageScore">0.0%</p>
+    <div class="portal-container">
+        <!-- Admin Login View -->
+        <div id="vAdminLogin" class="view active">
+            <div class="auth-card">
+                <h2>Admin Portal Login</h2>
+                <div id="errBlock" class="error-banner" style="display: none;"></div>
+                <form onsubmit="executeAdminAuth(event)">
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="adminEmail" required placeholder="admin@domain.com">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="adminPassword" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary">Sign In</button>
+                </form>
+                <div class="auth-footer-links">
+                    <p><a href="#" onclick="routeToView('vPasswordReset')">Forgot Password?</a></p>
+                    <p class="switch-auth-mode">Candidate portal? <a href="#" onclick="routeToView('vCandidateLogin')">Sign in here</a></p>
+                </div>
             </div>
         </div>
-        <button onclick="displayActiveExamsManagementList()" class="btn-secondary">Manage Exams</button>
-        <button onclick="loadGlobalPerformanceTracker()" class="btn-secondary">View Results</button>
-        <button onclick="openAdminLogoutModal()" class="btn-danger">Logout</button>
-    </div>
 
-    <!-- Manage Exams View -->
-    <div id="vManageExams" class="view" style="display: none;">
-        <h2>Manage Examinations</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Duration</th>
-                    <th style="text-align: right;">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="managementExamsTableBody">
-                <tr><td colspan="4" style="text-align:center;">Loading examinations...</td></tr>
-            </tbody>
-        </table>
-        <button onclick="routeToView('vAdminDash')" class="btn-secondary">Back to Dashboard</button>
-    </div>
+        <!-- Candidate Login View (Restored) -->
+        <div id="vCandidateLogin" class="view" style="display: none;">
+            <div class="auth-card">
+                <h2>Candidate Portal Login</h2>
+                <form onsubmit="executeCandidateAuth(event)">
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="candidateEmail" required placeholder="candidate@domain.com">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="candidatePassword" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary">Candidate Sign In</button>
+                </form>
+                <div class="auth-footer-links">
+                    <p>New candidate? <a href="#" onclick="routeToView('vCandidateRegister')">Create Account</a></p>
+                    <p class="switch-auth-mode">Back to <a href="#" onclick="routeToView('vAdminLogin')">Admin Login</a></p>
+                </div>
+            </div>
+        </div>
 
-    <!-- Performance Tracker View -->
-    <div id="vScoreTracker" class="view" style="display: none;">
-        <h2>Global Performance Tracker</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Candidate</th>
-                    <th>Exam ID</th>
-                    <th>Status</th>
-                    <th>Score</th>
-                    <th>Time Spent</th>
-                </tr>
-            </thead>
-            <tbody id="scoresTableBody">
-                <tr><td colspan="5" style="text-align:center;">Loading performance data...</td></tr>
-            </tbody>
-        </table>
-        <button onclick="routeToView('vAdminDash')" class="btn-secondary">Back to Dashboard</button>
-    </div>
+        <!-- Candidate Register View (OTP & Mobile Completely Cleaned) -->
+        <div id="vCandidateRegister" class="view" style="display: none;">
+            <div class="auth-card">
+                <h2>Create Candidate Account</h2>
+                <form onsubmit="executeCandidateRegister(event)">
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <input type="text" id="regFullName" required placeholder="John Doe">
+                    </div>
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="regEmail" required placeholder="john@edu.com">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="regPassword" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary">Register Profile</button>
+                </form>
+                <div class="auth-footer-links">
+                    <p>Already have an account? <a href="#" onclick="routeToView('vCandidateLogin')">Sign In</a></p>
+                </div>
+            </div>
+        </div>
 
-    <!-- Logout Modal Overlay -->
-    <div id="adminLogoutModalOverlay" style="display: none; opacity: 0; transition: opacity 150ms ease;">
-        <div id="adminLogoutModalCard" style="transform: scale(0.85); transition: transform 150ms ease;">
-            <h3>Confirm Logout</h3>
-            <p>Are you sure you want to end your administrative session?</p>
-            <button onclick="confirmAdminLogout()" class="btn-danger">Yes, Logout</button>
-            <button onclick="closeAdminLogoutModal()" class="btn-secondary">Cancel</button>
+        <!-- Direct Password Reset View (No OTP, Clean UI) -->
+        <div id="vPasswordReset" class="view" style="display: none;">
+            <div class="auth-card">
+                <h2>Reset Password</h2>
+                <form onsubmit="confirmPasswordReset(event)">
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="recoveryEmail" required placeholder="Enter your email">
+                    </div>
+                    <div class="input-group">
+                        <label>New Password</label>
+                        <input type="password" id="newAccountPassword" required placeholder="Enter new password">
+                    </div>
+                    <button type="submit" class="btn-primary">Update Password</button>
+                </form>
+                <div class="auth-footer-links">
+                    <p><a href="#" onclick="routeToView('vAdminLogin')">Back to Login</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard View (Restored Grid & Layout Structure) -->
+        <div id="vAdminDash" class="view" style="display: none;">
+            <div class="dashboard-header">
+                <h2>Dashboard Overview</h2>
+            </div>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Total Exams</h3>
+                    <p id="statTotalExams">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Submissions</h3>
+                    <p id="statTotalSubmissions">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Average Score</h3>
+                    <p id="statAverageScore">0.0%</p>
+                </div>
+            </div>
+            <div class="dashboard-actions">
+                <button onclick="displayActiveExamsManagementList()" class="btn-secondary">Manage Exams</button>
+                <button onclick="loadGlobalPerformanceTracker()" class="btn-secondary">View Results</button>
+                <button onclick="openAdminLogoutModal()" class="btn-danger">Logout</button>
+            </div>
+        </div>
+
+        <!-- Manage Exams View -->
+        <div id="vManageExams" class="view" style="display: none;">
+            <h2>Manage Examinations</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Duration</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="managementExamsTableBody">
+                        <tr><td colspan="4" style="text-align:center;">Loading examinations...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <button onclick="routeToView('vAdminDash')" class="btn-secondary" style="margin-top: 1rem;">Back to Dashboard</button>
+        </div>
+
+        <!-- Performance Tracker View -->
+        <div id="vScoreTracker" class="view" style="display: none;">
+            <h2>Global Performance Tracker</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Exam ID</th>
+                            <th>Status</th>
+                            <th>Score</th>
+                            <th>Time Spent</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoresTableBody">
+                        <tr><td colspan="5" style="text-align:center;">Loading performance data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <button onclick="routeToView('vAdminDash')" class="btn-secondary" style="margin-top: 1rem;">Back to Dashboard</button>
+        </div>
+
+        <!-- Logout Modal Overlay -->
+        <div id="adminLogoutModalOverlay" class="modal-overlay" style="display: none;">
+            <div id="adminLogoutModalCard" class="modal-card">
+                <h3>Confirm Logout</h3>
+                <p>Are you sure you want to end your administrative session?</p>
+                <div class="modal-actions">
+                    <button onclick="confirmAdminLogout()" class="btn-danger">Yes, Logout</button>
+                    <button onclick="closeAdminLogoutModal()" class="btn-secondary">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 
