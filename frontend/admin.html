@@ -1,188 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Portal - Exam Management</title>
+    <title>Management Interface</title>
+
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
+    <div class="wrapper">
+        <div id="errBlock" class="err"></div>
 
-    <div class="portal-container">
-        <!-- Admin Login View -->
+        <!-- View 1: Admin Authentication Gate -->
         <div id="vAdminLogin" class="view active">
-            <div class="auth-card">
-                <h2>Admin Portal Login</h2>
-                <div id="errBlock" class="error-banner" style="display: none;"></div>
-                <form onsubmit="executeAdminAuth(event)">
-                    <div class="input-group">
-                        <label>Email Address</label>
-                        <input type="email" id="adminEmail" required placeholder="admin@domain.com">
-                    </div>
-                    <div class="input-group">
-                        <label>Password</label>
+            <h2>Administrative Access Gate</h2>
+            <form onsubmit="executeAdminAuth(event)" style="margin-top: 1.5rem;">
+                <div class="form-group">
+                    <label>Admin Email</label>
+                    <input type="email" id="adminEmail" required placeholder="admin@edu.com">
+                </div>
+
+                <div class="form-group">
+                    <label>Security Password</label>
+                    <div class="password-wrapper">
                         <input type="password" id="adminPassword" required placeholder="••••••••">
+                        <button type="button" class="password-toggle-btn" onclick="togglePasswordDisplay('adminPassword')">
+                            <i data-lucide="eye"></i>
+                        </button>
                     </div>
-                    <button type="submit" class="btn-primary">Sign In</button>
-                </form>
-                <div class="auth-footer-links">
-                    <p><a href="#" onclick="routeToView('vPasswordReset')">Forgot Password?</a></p>
-                    <p class="switch-auth-mode">Candidate portal? <a href="#" onclick="routeToView('vCandidateLogin')">Sign in here</a></p>
                 </div>
-            </div>
+
+                <!-- Action Row: Compact Authorize Button & Forgot Password link side-by-side -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; margin-bottom: 1.5rem; gap: 1rem;">
+                    <button type="submit" style="width: auto; padding: 0.75rem 2rem;">Authorize Session</button>
+                    <button type="button" class="switch-auth-link" onclick="routeToView('vAdminForgotPassword')" style="font-size: 0.9rem; background: none; border: none; cursor: pointer;">Forgot Password?</button>
+                </div>
+
+                <div style="text-align: left; margin-top: 1rem;">
+                    <button type="button" class="btn-secondary" onclick="window.location.href='index.html'">Back to Student Login</button>
+                </div>
+            </form>
         </div>
 
-        <!-- Candidate Login View (Restored) -->
-        <div id="vCandidateLogin" class="view" style="display: none;">
-            <div class="auth-card">
-                <h2>Candidate Portal Login</h2>
-                <form onsubmit="executeCandidateAuth(event)">
-                    <div class="input-group">
-                        <label>Email Address</label>
-                        <input type="email" id="candidateEmail" required placeholder="candidate@domain.com">
-                    </div>
-                    <div class="input-group">
-                        <label>Password</label>
-                        <input type="password" id="candidatePassword" required placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="btn-primary">Candidate Sign In</button>
-                </form>
-                <div class="auth-footer-links">
-                    <p>New candidate? <a href="#" onclick="routeToView('vCandidateRegister')">Create Account</a></p>
-                    <p class="switch-auth-mode">Back to <a href="#" onclick="routeToView('vAdminLogin')">Admin Login</a></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Candidate Register View (OTP & Mobile Completely Cleaned) -->
-        <div id="vCandidateRegister" class="view" style="display: none;">
-            <div class="auth-card">
-                <h2>Create Candidate Account</h2>
-                <form onsubmit="executeCandidateRegister(event)">
-                    <div class="input-group">
-                        <label>Full Name</label>
-                        <input type="text" id="regFullName" required placeholder="John Doe">
-                    </div>
-                    <div class="input-group">
-                        <label>Email Address</label>
-                        <input type="email" id="regEmail" required placeholder="john@edu.com">
-                    </div>
-                    <div class="input-group">
-                        <label>Password</label>
-                        <input type="password" id="regPassword" required placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="btn-primary">Register Profile</button>
-                </form>
-                <div class="auth-footer-links">
-                    <p>Already have an account? <a href="#" onclick="routeToView('vCandidateLogin')">Sign In</a></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Direct Password Reset View (No OTP, Clean UI) -->
-        <div id="vPasswordReset" class="view" style="display: none;">
-            <div class="auth-card">
-                <h2>Reset Password</h2>
+        <!-- View: Admin Forgot Password Module with Split OTP Support -->
+        <div id="vAdminForgotPassword" class="view" style="display: none;">
+            <h2>Admin Password Recovery</h2>
+            <div class="card" style="max-width: 450px; margin: auto;">
+                <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.95rem;">Enter the administrative email address to dispatch and verify recovery tokens securely.</p>
+                
                 <form onsubmit="confirmPasswordReset(event)">
-                    <div class="input-group">
-                        <label>Email Address</label>
-                        <input type="email" id="recoveryEmail" required placeholder="Enter your email">
+                    <div class="form-group">
+                        <label>Admin Email Address</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="email" id="recoveryEmail" required placeholder="admin@edu.com" style="flex-grow:1;">
+                            <button type="button" class="btn-secondary" onclick="requestPasswordResetOtp()" style="white-space:nowrap; padding: 0.85rem 1rem;">Send Code</button>
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label>New Password</label>
-                        <input type="password" id="newAccountPassword" required placeholder="Enter new password">
+
+                    <!-- OTP & New Password fields (revealed after code is sent) -->
+                    <div id="recoveryOtpContainer" style="display: none; margin-top: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Enter 6-Digit Code</label>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;">
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <span class="otp-separator">-</span>
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                            <input type="text" maxlength="1" class="otp-box recovery-otp-box" style="width: 45px; height: 45px; text-align: center; font-size: 1.2rem;" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>New Admin Password</label>
+                            <input type="password" id="newAccountPassword" required placeholder="Enter new admin password" style="width: 100%; padding: 0.75rem;">
+                        </div>
+
+                        <button type="submit" class="btn-success" style="width: 100%; margin-top: 1rem;">Update Admin Password</button>
                     </div>
-                    <button type="submit" class="btn-primary">Update Password</button>
                 </form>
-                <div class="auth-footer-links">
-                    <p><a href="#" onclick="routeToView('vAdminLogin')">Back to Login</a></p>
+
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button type="button" class="btn-secondary" onclick="routeToView('vAdminLogin')" style="width: 100%;">Return to Admin Sign In</button>
                 </div>
             </div>
         </div>
 
-        <!-- Admin Dashboard View (Restored Grid & Layout Structure) -->
-        <div id="vAdminDash" class="view" style="display: none;">
-            <div class="dashboard-header">
-                <h2>Dashboard Overview</h2>
+        <!-- View 2: Panel Control -->
+        <div id="vAdminDash" class="view">
+            <div class="navbar" style="position: relative; overflow: visible; z-index: 50;">
+                <h2>System Control Panel</h2>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <!-- Fixed Dropdown Wrapper Structure -->
+                    <div class="dropdown-wrapper" style="position: relative;">
+                        <button onclick="toggleAdminDropdownMenu(event)" class="dropdown-trigger-btn" type="button">
+                            Control Actions <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+                        </button>
+                        <div id="adminDropdownMenuContent" class="dropdown-content-box" style="display: none;">
+                            <a href="#" onclick="routeToView('vCreateExam'); closeAdminDropdownDirectly(); return false;">
+                                <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i> Create Exam Matrix
+                            </a>
+                            <a href="#" onclick="displayActiveExamsManagementList(); closeAdminDropdownDirectly(); return false;" class="danger-item">
+                                <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> Manage/Delete Exams
+                            </a>
+                            <a href="#" onclick="routeToView('vAdminRegister'); closeAdminDropdownDirectly(); return false;">
+                                <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i> + Add Admin
+                            </a>
+                            <a href="#" onclick="loadGlobalPerformanceTracker(); closeAdminDropdownDirectly(); return false;">
+                                <i data-lucide="bar-chart-3" style="width: 16px; height: 16px;"></i> Score Tracking Metrics
+                            </a>
+                            <a href="#" onclick="openAdminProfileSettings(); closeAdminDropdownDirectly(); return false;">
+                                <i data-lucide="settings" style="width: 16px; height: 16px;"></i> Profile Settings
+                            </a>
+                        </div>
+                    </div>
+                    <button onclick="openAdminLogoutModal()" class="btn-secondary" type="button">Logout</button>
+                </div>
             </div>
-            <div class="stats-container">
-                <div class="stat-card">
-                    <h3>Total Exams</h3>
-                    <p id="statTotalExams">0</p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="card" style="border-left: 5px solid var(--primary);">
+                    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: bold; text-transform: uppercase;">Total Active Exams</div>
+                    <div id="statTotalExams" style="font-size: 2rem; font-weight: 800; margin-top: 0.5rem; color: var(--primary);">--</div>
                 </div>
-                <div class="stat-card">
-                    <h3>Total Submissions</h3>
-                    <p id="statTotalSubmissions">0</p>
+                <div class="card" style="border-left: 5px solid var(--success);">
+                    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: bold; text-transform: uppercase;">Completed Submissions</div>
+                    <div id="statTotalSubmissions" style="font-size: 2rem; font-weight: 800; margin-top: 0.5rem; color: var(--success);">--</div>
                 </div>
-                <div class="stat-card">
-                    <h3>Average Score</h3>
-                    <p id="statAverageScore">0.0%</p>
+                <div class="card" style="border-left: 5px solid #eab308;">
+                    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: bold; text-transform: uppercase;">Class Score Average</div>
+                    <div id="statAverageScore" style="font-size: 2rem; font-weight: 800; margin-top: 0.5rem; color: #eab308;">--%</div>
                 </div>
-            </div>
-            <div class="dashboard-actions">
-                <button onclick="displayActiveExamsManagementList()" class="btn-secondary">Manage Exams</button>
-                <button onclick="loadGlobalPerformanceTracker()" class="btn-secondary">View Results</button>
-                <button onclick="openAdminLogoutModal()" class="btn-danger">Logout</button>
             </div>
         </div>
 
-        <!-- Manage Exams View -->
-        <div id="vManageExams" class="view" style="display: none;">
-            <h2>Manage Examinations</h2>
-            <div class="table-responsive">
-                <table>
+        <!-- View: Admin Profile Settings -->
+        <div id="vAdminProfile" class="view">
+            <div class="navbar">
+                <h2>Admin Profile Settings</h2>
+                <button onclick="routeToView('vAdminDash')" class="btn-secondary">Back to Panel</button>
+            </div>
+            <div class="profile-layout-container">
+                <form onsubmit="updateAdminGeneralMetadata(event)" class="profile-section-card">
+                    <div class="profile-section-title">General Admin Details</div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="profAdminName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="profAdminEmail" required>
+                    </div>
+                    <button type="submit" class="btn-success">Save Admin Info</button>
+                </form>
+
+                <form onsubmit="updateAdminPasswordSecurityMetric(event)" class="profile-section-card">
+                    <div class="profile-section-title">Modify Security Passphrase</div>
+                    <div class="form-group">
+                        <label>Existing Master Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="profAdminCurrentPassword" required placeholder="Verify current admin credentials">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordDisplay('profAdminCurrentPassword')">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Alternative Master Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="profAdminNewPassword" required placeholder="Enter replacement system key">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordDisplay('profAdminNewPassword')">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-danger">Update Master Password</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin Registration View Panel -->
+        <div id="vAdminRegister" class="view">
+            <div class="auth-card" style="background: var(--surface-card); padding: 2rem; border-radius: 12px; border:1px solid var(--border); max-width: 600px; margin: 2rem auto;">
+                <div style="background: var(--surface); padding: 1rem 1.5rem; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="color: #ffffff; margin: 0; font-size: 1.5rem; font-weight: 700;">Register New Administrator</h2>
+                    <button type="button" class="btn-secondary" onclick="window.routeToView('vAdminDash')">Cancel</button>
+                </div>
+
+                <form onsubmit="transmitAdminRegistration(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="newAdminName" required placeholder="Jane Doe">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="newAdminEmail" required placeholder="jane.admin@edu.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="newAdminPassword" required placeholder="••••••••">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordDisplay('newAdminPassword')">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-success" style="width: 100%;">
+                        Create Admin Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- View 4: Exam Builder -->
+        <div id="vCreateExam" class="view">
+            <div class="navbar">
+                <h2>Generate Examination Matrix</h2>
+                <button onclick="routeToView('vAdminDash')" class="btn-secondary">Cancel</button>
+            </div>
+            <form onsubmit="transmitExamMatrix(event)">
+                <div class="form-group">
+                    <label>Assessment Title</label>
+                    <input type="text" id="examTitleInput" required placeholder="e.g., Core Java Core Exam">
+                </div>
+                <div class="form-group">
+                    <label>Duration Allotment (Minutes)</label>
+                    <input type="number" id="examDurationInput" required min="1" max="180" placeholder="45">
+                </div>
+                <h3 style="margin: 2rem 0 1rem 0; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">Question Structure Core</h3>
+                <div id="dynamicQuestionsContainer"></div>
+                <div style="margin: 1.5rem 0; display: flex; gap: 1rem;">
+                    <button type="button" onclick="appendQuestionTemplate('MCQ')" class="btn-secondary">+ Add MCQ Block</button>
+                    <button type="button" onclick="appendQuestionTemplate('TF')" class="btn-secondary">+ Add True/False Block</button>
+                </div>
+                <button type="submit" class="btn-success" style="width: 100%;">Commit Matrix to System Storage</button>
+            </form>
+        </div>
+
+        <!-- View 5: Score Progress Metrics -->
+        <div id="vScoreTracker" class="view">
+            <div class="navbar">
+                <h2>Cross-Institutional Performance Metrics</h2>
+                <button onclick="routeToView('vAdminDash')" class="btn-secondary">Back to Panel</button>
+            </div>
+            <div style="margin-top: 1.5rem; overflow-x: auto;">
+                <table class="data-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Title</th>
-                            <th>Duration</th>
-                            <th style="text-align: right;">Actions</th>
+                            <th>Student Name</th>
+                            <th>Exam Target</th>
+                            <th>Execution Status</th>
+                            <th>Progressive Grade / Visual Bar</th>
+                            <th>Time Consumed</th>
                         </tr>
                     </thead>
-                    <tbody id="managementExamsTableBody">
-                        <tr><td colspan="4" style="text-align:center;">Loading examinations...</td></tr>
-                    </tbody>
+                    <tbody id="scoresTableBody"></tbody>
                 </table>
             </div>
-            <button onclick="routeToView('vAdminDash')" class="btn-secondary" style="margin-top: 1rem;">Back to Dashboard</button>
         </div>
 
-        <!-- Performance Tracker View -->
-        <div id="vScoreTracker" class="view" style="display: none;">
-            <h2>Global Performance Tracker</h2>
-            <div class="table-responsive">
-                <table>
+        <!-- View 6: Manage/Delete Exams Panel -->
+        <div id="vManageExams" class="view">
+            <div class="navbar">
+                <h2>Active Examination Matrices</h2>
+                <button onclick="routeToView('vAdminDash')" class="btn-secondary">Back to Panel</button>
+            </div>
+            <div style="margin-top: 1.5rem; overflow-x: auto;">
+                <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Candidate</th>
                             <th>Exam ID</th>
-                            <th>Status</th>
-                            <th>Score</th>
-                            <th>Time Spent</th>
+                            <th>Assessment Title</th>
+                            <th>Duration Allotment</th>
+                            <th style="text-align: right;">System Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="scoresTableBody">
-                        <tr><td colspan="5" style="text-align:center;">Loading performance data...</td></tr>
-                    </tbody>
+                    <tbody id="managementExamsTableBody"></tbody>
                 </table>
             </div>
-            <button onclick="routeToView('vAdminDash')" class="btn-secondary" style="margin-top: 1rem;">Back to Dashboard</button>
         </div>
 
-        <!-- Logout Modal Overlay -->
-        <div id="adminLogoutModalOverlay" class="modal-overlay" style="display: none;">
-            <div id="adminLogoutModalCard" class="modal-card">
-                <h3>Confirm Logout</h3>
-                <p>Are you sure you want to end your administrative session?</p>
-                <div class="modal-actions">
-                    <button onclick="confirmAdminLogout()" class="btn-danger">Yes, Logout</button>
-                    <button onclick="closeAdminLogoutModal()" class="btn-secondary">Cancel</button>
+        <!-- Custom Animated Logout Overlay -->
+        <div id="adminLogoutModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 15, 23, 0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
+            <div id="adminLogoutModalCard" style="background: var(--surface-card); border: 1px solid var(--border); padding: 2.5rem; border-radius: 16px; box-shadow: var(--shadow); text-align: center; max-width: 400px; width: 90%; transform: scale(0.85); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                <h3 style="color: #ffffff; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 800;">Exit Admin Panel?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Clear all local administrative session keys?</p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button onclick="confirmAdminLogout()" class="btn-danger" style="padding: 0.75rem 1.5rem;">Yes, Logout</button>
+                    <button onclick="closeAdminLogoutModal()" class="btn-secondary" style="padding: 0.75rem 1.5rem;">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <script src="admin-app.js"></script>
 </body>
+
 </html>
