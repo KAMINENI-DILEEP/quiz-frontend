@@ -243,7 +243,7 @@ async function requestSignupEmailOtp() {
         });
         const text = await res.text();
         const data = text ? JSON.parse(text) : {};
-        if (!res.ok) throw new Error(data.message || 'Request failed.');
+        if (!res.ok) throw new Error(data.message || 'Failed to send OTP.');
         alert(`Verification code dispatched to: ${email}`);
     } catch (err) { alert(err.message); }
 }
