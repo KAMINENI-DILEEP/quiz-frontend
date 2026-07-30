@@ -1,0 +1,491 @@
+:root {
+    --bg-app: linear-gradient(135deg, #090a0f 0%, #131826 50%, #07090e 100%);
+    --surface: rgba(18, 22, 31, 0.90);
+    --surface-card: rgba(24, 29, 40, 0.95);
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --secondary: #94a3b8;
+    --success: #10b981;
+    --neon-accent: #06b6d4;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: rgba(99, 102, 241, 0.25);
+    --radius: 24px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    touch-action: manipulation;
+}
+
+body {
+    background: var(--bg-app);
+    background-attachment: fixed;
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+/* Chrome/Safari/Edge Autofill Override */
+input:-webkit-autofill, 
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #181d28 inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Master Swapping Card Shell Container */
+.portal-container, .wrapper {
+    width: 100% !important;
+    max-width: 860px !important;
+    background: var(--surface) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    padding: 0 !important;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: auto;
+    position: relative;
+    overflow: hidden !important;
+    height: 520px !important;
+}
+
+.portal-container:has(.data-table), 
+.wrapper:has(.data-table),
+.portal-container:has(#dynamicQuestionsContainer), 
+.wrapper:has(#dynamicQuestionsContainer),
+.portal-container:has(.profile-layout-container),
+.wrapper:has(.profile-layout-container) {
+    max-width: 980px;
+    height: auto !important;
+    padding: 2.5rem !important;
+}
+
+/* Swapping Container Architecture */
+.swapping-container {
+    position: relative;
+    width: 100%;
+    height: 520px !important;
+    background: var(--surface);
+    display: flex;
+    overflow: hidden;
+}
+
+.form-container {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    transition: all 0.6s ease-in-out;
+}
+
+.form-container form {
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Default States: Sign In is on Left, Sign Up is hidden on Right */
+.sign-in-form-container {
+    left: 0;
+    z-index: 2;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.sign-up-form-container {
+    left: 50%;
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Active Slide Transition States (Sliding to reveal Create Account on Right) */
+.swapping-container.active-signup .sign-in-form-container {
+    transform: translateX(-100%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.swapping-container.active-signup .sign-up-form-container {
+    transform: translateX(0%);
+    z-index: 5;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Sliding Toggle Overlay Panel */
+.toggle-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 100;
+    border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.swapping-container.active-signup .toggle-container {
+    transform: translateX(-100%);
+    border-radius: var(--radius) 0 0 var(--radius);
+}
+
+.toggle-panel {
+    position: absolute;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%);
+    color: #fff;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transform: translateX(0);
+}
+
+.swapping-container.active-signup .toggle-panel {
+    transform: translateX(50%);
+}
+
+.toggle-panel-content {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3rem;
+    text-align: center;
+    top: 0;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.toggle-panel h2 {
+    margin-bottom: 1.25rem !important;
+}
+
+.toggle-panel p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1.75rem !important;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.toggle-left {
+    left: 0;
+    transform: translateX(0);
+}
+
+.toggle-right {
+    right: 0;
+    transform: translateX(0);
+}
+
+/* GPU Hardware-Accelerated View Switching */
+.view {
+    display: none !important;
+    will-change: opacity, transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+.view.active {
+    display: block !important;
+    animation: smoothReveal 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes smoothReveal {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+h2 {
+    color: #ffffff;
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-bottom: 0.75rem;
+}
+
+.form-group {
+    margin-bottom: 0.75rem;
+    width: 100%;
+    position: relative;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* General Input Fields */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+input[type="number"], 
+select, 
+textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    background: var(--surface-card);
+    color: #ffffff !important;
+    caret-color: var(--neon-accent);
+    transition: var(--transition);
+}
+
+input:focus, 
+select:focus, 
+textarea:focus {
+    outline: none;
+    background: rgba(24, 29, 40, 0.95) !important;
+    color: #ffffff !important;
+    border-color: var(--neon-accent);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.25);
+}
+
+/* Precise Password Wrapper & Eye Icon Positioning Fix */
+.password-wrapper {
+    position: relative !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.password-wrapper input {
+    width: 100% !important;
+    padding-right: 3rem !important;
+    margin-bottom: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.password-toggle-btn {
+    position: absolute !important;
+    right: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--text-muted) !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 50 !important;
+    height: 24px !important;
+    width: 24px !important;
+}
+
+.password-toggle-btn:hover {
+    color: var(--neon-accent) !important;
+}
+
+/* Social Icon Row */
+.social-container {
+    margin: 8px 0;
+    display: flex;
+    gap: 10px;
+}
+
+.social-icon {
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    color: var(--text-main);
+    background: var(--surface-card);
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.social-icon:hover {
+    border-color: var(--neon-accent);
+    color: var(--neon-accent);
+    transform: translateY(-2px);
+}
+
+/* Buttons & Action Triggers */
+button, .btn-primary {
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+button:hover, .btn-primary:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 15px 30px rgba(99, 102, 241, 0.5);
+    transform: translateY(-2px);
+}
+
+button:active { 
+    transform: scale(0.98) !important; 
+}
+
+button.btn-success {
+    background: var(--success) !important;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3) !important;
+}
+
+button.btn-success:hover {
+    background: #059669 !important;
+    box-shadow: 0 15px 30px rgba(16, 185, 129, 0.5) !important;
+}
+
+button.btn-danger {
+    background: #f43f5e;
+    box-shadow: 0 10px 20px rgba(244, 63, 94, 0.3);
+}
+
+button.btn-danger:hover { 
+    background: #e11d48; 
+    box-shadow: 0 15px 30px rgba(244, 63, 94, 0.5); 
+}
+
+button.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    box-shadow: none;
+}
+
+button.btn-secondary:hover { 
+    background: rgba(255, 255, 255, 0.1); 
+}
+
+.btn-outline-custom {
+    background: transparent;
+    border: 2px solid #fff;
+    color: #fff;
+    padding: 0.75rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    width: auto;
+}
+
+.btn-outline-custom:hover {
+    background: #fff;
+    color: var(--primary);
+}
+
+button.switch-auth-link, .switch-auth-link {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--neon-accent) !important;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    padding: 0.25rem 0.5rem;
+    display: inline-block;
+}
+
+button.switch-auth-link:hover, .switch-auth-link:hover {
+    color: #22d3ee !important;
+}
+
+/* Navbar & Card System */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface-card);
+    padding: 1.25rem 1.5rem;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.navbar h2 { 
+    font-size: 1.2rem; 
+    margin-bottom: 0 !important; 
+}
+
+.card {
+    border: 1px solid var(--border);
+    padding: 1.75rem;
+    border-radius: 14px;
+    margin-bottom: 1.25rem;
+    background: var(--surface-card);
+    box-shadow: var(--shadow);
+}
+
+/* Error Banner */
+.err {
+    background: rgba(244, 63, 94, 0.15);
+    color: #fb7185;
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    padding: 0.85rem;
+    border-radius: 10px;
+    margin-bottom: 1.25rem;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+}
+
+.err:empty, #errBlock:empty {
+    display: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+svg.lucide, .form-group i[data-lucide] {
+    display: inline-block !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    visibility: visible !important;
+}

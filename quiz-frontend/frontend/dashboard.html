@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Dashboard</title>
+    <link rel="stylesheet" href="stylel.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="dashboard-shell">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="dash-sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-dot"></span>
+                <h2>QuizPortal</h2>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active" onclick="switchTab('overview', event)">
+                    <i data-lucide="layout-dashboard"></i> Overview
+                </a>
+                <a href="#" class="menu-item" id="navExams" onclick="switchTab('exams', event)">
+                    <i data-lucide="book-open"></i> <span id="examNavText">Assigned Exams</span>
+                </a>
+                <a href="#" class="menu-item" id="navAnalytics" onclick="switchTab('analytics', event)">
+                    <i data-lucide="bar-chart-3"></i> Performance Tracker
+                </a>
+                <a href="#" class="menu-item" onclick="switchTab('settings', event)">
+                    <i data-lucide="settings"></i> Profile Settings
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="openLogoutModal()" class="btn-danger" style="width: 100%;">
+                    <i data-lucide="log-out"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="dash-main">
+            <!-- Top Navbar -->
+            <header class="dash-navbar">
+                <div class="welcome-text">
+                    <h3>Welcome back, <span id="dashUserName" style="color: var(--primary);">User</span></h3>
+                    <p class="subtext">Here is your activity overview for today.</p>
+                </div>
+                <div class="user-badge-profile" onclick="switchTab('settings', event)">
+                    <div class="avatar-circle" id="userAvatarText">U</div>
+                    <span id="navUserEmail" style="font-size: 0.9rem; font-weight: 600;">user@domain.com</span>
+                </div>
+            </header>
+
+            <!-- TAB 1: OVERVIEW METRICS -->
+            <section id="tab-overview" class="dash-tab-content active">
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span id="statLabel1">Total Assigned</span>
+                            <i data-lucide="file-text" style="color: var(--primary);"></i>
+                        </div>
+                        <p id="statVal1" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span id="statLabel2">Completed Exams</span>
+                            <i data-lucide="check-circle" style="color: var(--success);"></i>
+                        </div>
+                        <p id="statVal2" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span id="statLabel3">Average Score</span>
+                            <i data-lucide="trending-up" style="color: var(--neon-blue);"></i>
+                        </div>
+                        <p id="statVal3" class="stat-number">0.0%</p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Recent System Activities</h3>
+                    <div id="recentActivityList" style="color: var(--text-muted); font-size: 0.9rem;">
+                        Loading activity matrix...
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: EXAMS MANAGEMENT / LISTING -->
+            <section id="tab-exams" class="dash-tab-content" style="display: none;">
+                <div class="navbar" style="margin-bottom: 1rem;">
+                    <h3 id="examSectionTitle">Exam Modules</h3>
+                    <button id="adminAddExamBtn" class="btn-success" style="display: none; padding: 0.5rem 1rem;" onclick="openCreateExamModal()">+ Create Exam</button>
+                </div>
+                <div id="dynamicExamContainer">
+                    <!-- Injected dynamically via JS depending on role -->
+                </div>
+            </section>
+
+            <!-- TAB 3: PERFORMANCE TRACKER -->
+            <section id="tab-analytics" class="dash-tab-content" style="display: none;">
+                <h3>Global Score Matrix</h3>
+                <div class="table-responsive" style="margin-top: 1rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Candidate</th>
+                                <th>Exam Reference</th>
+                                <th>Status</th>
+                                <th>Grade</th>
+                                <th>Time Taken</th>
+                            </tr>
+                        </thead>
+                        <tbody id="globalAnalyticsTableBody">
+                            <tr><td colspan="5" style="text-align: center;">Fetching performance records...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 4: PROFILE SETTINGS -->
+            <section id="tab-settings" class="dash-tab-content" style="display: none;">
+                <h3>Account & Security Settings</h3>
+                <div class="card" style="margin-top: 1rem;">
+                    <form onsubmit="updateDashboardProfile(event)">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="profileFullName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="profileEmail" required>
+                        </div>
+                        <button type="submit" class="btn-success">Save Changes</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

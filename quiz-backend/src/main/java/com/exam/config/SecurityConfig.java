@@ -25,28 +25,34 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
-        http
-            .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers(HttpMethod.HEAD, "/**").permitAll()
-                .requestMatchers("/api/login", "/api/register", "/api/ping").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/results").hasRole("ADMIN")
-                .requestMatchers("/api/student/exams/**").hasRole("STUDENT")
-                .requestMatchers("/api/student/**").hasRole("STUDENT")
-                .requestMatchers("/api/profile/update-general").authenticated() 
-                .requestMatchers("/api/profile/update-password").authenticated() 
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(Customizer.withDefaults())
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            .requestMatchers(
+                "/ping",
+                "/api/ping",
+                "/api/login",
+                "/api/register",
+                "/api/send-email-otp",
+                "/api/forgot-password",
+                "/api/reset-password"
+            ).permitAll()
+            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            .requestMatchers("/api/student/**").hasRole("STUDENT")
+            .requestMatchers("/api/student/exams/**").hasRole("STUDENT")
+            .requestMatchers("/api/student/**").hasRole("STUDENT")
+            .requestMatchers("/api/profile/update-general").authenticated() 
+            .requestMatchers("/api/profile/update-password").authenticated() 
+            .anyRequest().authenticated()
+        )
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
-
+    return http.build();
+}
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
