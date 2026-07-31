@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal - QuizPortal Pro</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="admin-page">
+  <section id="vAdminLogin" class="admin-login-screen">
+    <div class="admin-login-card">
+      <div class="admin-login-icon"><i data-lucide="shield-check"></i></div>
+      <h1>Administrator Sign In</h1>
+      <p>Use an account with ADMIN privileges to continue.</p>
+      <div id="errBlock" class="err"></div>
+      <form onsubmit="executeAdminAuth(event)">
+        <div class="form-group"><label>Admin Email</label><input id="adminEmail" type="email" required placeholder="admin@example.com"></div>
+        <div class="form-group"><label>Password</label><div class="password-wrapper"><input id="adminPassword" type="password" required placeholder="Enter password"><button type="button" class="password-toggle-btn" onclick="togglePasswordDisplay('adminPassword', event)"><i data-lucide="eye"></i></button></div></div>
+        <button type="submit" class="btn-primary">Sign in to Admin Portal</button>
+      </form>
+      <a class="admin-back-link" href="index.html">← Back to student login</a>
+    </div>
+  </section>
+
+  <div id="vAdminDash" class="dashboard-shell admin-dashboard" style="display:none">
+    <aside class="dash-sidebar admin-sidebar">
+      <div>
+        <div class="sidebar-brand"><span class="brand-dot"></span><h2>Admin Control</h2></div>
+        <nav class="sidebar-menu">
+          <a href="#" class="menu-item active" onclick="switchAdminTab('overview', event)"><i data-lucide="layout-dashboard"></i><span>System Overview</span></a>
+          <a href="#" class="menu-item" onclick="switchAdminTab('exams', event)"><i data-lucide="book-open"></i><span>Manage All Exams</span></a>
+          <a href="#" class="menu-item" onclick="switchAdminTab('analytics', event)"><i data-lucide="bar-chart-3"></i><span>Global Results</span></a>
+          <a href="#" class="menu-item" onclick="switchAdminTab('users', event)"><i data-lucide="users-round"></i><span>Registered Accounts</span></a>
+          <a href="#" class="menu-item" onclick="switchAdminTab('admins', event)"><i data-lucide="user-plus"></i><span>Add Administrator</span></a>
+          <a href="#" class="menu-item" onclick="switchAdminTab('profile', event)"><i data-lucide="settings"></i><span>Profile Settings</span></a>
+        </nav>
+      </div>
+      <button onclick="openAdminLogoutModal()" class="admin-logout-btn"><i data-lucide="log-out"></i><span>Sign out</span></button>
+    </aside>
+
+    <main class="dash-main">
+      <header class="dash-navbar">
+        <div><h3>Administrator Portal</h3><p class="subtext">Manage examinations and review student performance.</p></div>
+        <div class="user-badge-profile"><div class="avatar-circle" id="adminAvatar">A</div><span id="adminEmailDisplay">Administrator</span></div>
+      </header>
+
+      <div id="adminNotice" class="admin-notice" style="display:none"></div>
+
+      <section id="tab-overview" class="dash-tab-content active">
+        <div class="section-heading"><div><h3>System Overview</h3><p>Live summary of exams, submissions and performance.</p></div><div class="admin-auto-refresh"><span class="live-dot"></span> Auto refresh <button class="mini-icon-btn" title="Refresh now" onclick="refreshAdminData()"><i data-lucide="refresh-cw"></i></button></div></div>
+        <div class="stats-container admin-stats-grid">
+          <div class="stat-card"><div class="stat-header"><span>Total Students</span><i data-lucide="users"></i></div><p id="adminStatUsers" class="stat-number">—</p></div>
+          <div class="stat-card"><div class="stat-header"><span>Active Exams</span><i data-lucide="files"></i></div><p id="adminStatExams" class="stat-number">—</p></div>
+          <div class="stat-card"><div class="stat-header"><span>Completed Submissions</span><i data-lucide="check-circle-2"></i></div><p id="adminStatSubmissions" class="stat-number">—</p></div>
+          <div class="stat-card"><div class="stat-header"><span>Class Average</span><i data-lucide="trending-up"></i></div><p id="adminStatAvg" class="stat-number">—</p></div>
+        </div>
+
+        <div class="admin-overview-grid single-panel"><div class="dashboard-panel">
+            <div class="panel-title-row"><div><h3>Recent Performance</h3><p>Latest submitted assessments.</p></div></div>
+            <div id="adminRecentActivity" class="admin-recent-list"><p class="panel-note">Loading…</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-exams" class="dash-tab-content" style="display:none">
+        <div class="section-heading">
+          <div><h3>Manage All Exams</h3><p>Create, review and remove examination modules.</p></div>
+          <button class="btn-primary" onclick="openCreateExamPanel()"><i data-lucide="plus"></i> Create New Exam</button>
+        </div>
+
+        <div id="createExamPanel" class="dashboard-panel admin-form-panel" style="display:none">
+          <div class="panel-title-row"><div><h3>Create Examination</h3><p>Add exam details and question blocks.</p></div><button type="button" class="icon-close-btn" onclick="closeCreateExamPanel()"><i data-lucide="x"></i></button></div>
+          <form onsubmit="createAdminExam(event)">
+            <div class="admin-form-grid">
+              <div class="form-group"><label>Assessment Title</label><input id="examTitleInput" type="text" required placeholder="e.g. Core Java Assessment"></div>
+              <div class="form-group"><label>Duration (Minutes)</label><input id="examDurationInput" type="number" min="1" max="180" required placeholder="45"></div>
+            </div>
+            <div class="question-builder-heading"><div><h4>Questions</h4><p>Add Multiple Choice or True / False questions.</p></div><div class="question-add-buttons"><button type="button" class="btn-secondary compact-control" onclick="appendQuestionTemplate('MCQ')">+ Multiple Choice</button><button type="button" class="btn-secondary compact-control" onclick="appendQuestionTemplate('TF')">+ True / False</button></div></div>
+            <div id="dynamicQuestionsContainer"></div>
+            <button type="submit" class="btn-primary admin-wide-btn"><i data-lucide="save"></i> Save Examination</button>
+          </form>
+        </div>
+
+        <div class="dashboard-panel">
+          <div class="panel-title-row"><div><h3>Exam Modules</h3><p>All examinations currently available from the backend.</p></div><button class="mini-icon-btn labeled" onclick="loadAdminExams()"><i data-lucide="refresh-cw"></i> Reload</button></div>
+          <div class="table-wrap"><table class="results-table"><thead><tr><th>Exam ID</th><th>Assessment Title</th><th>Duration</th><th>Actions</th></tr></thead><tbody id="managementExamsTableBody"><tr><td colspan="4">Loading exams…</td></tr></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="tab-analytics" class="dash-tab-content" style="display:none">
+        <div class="section-heading results-toolbar">
+          <div><h3>Global Results</h3><p>Filter, sort and track student examination performance.</p></div>
+          <div class="global-filter-stack">
+            <label for="globalResultFilter">Filter / Sort Results</label>
+            <select id="globalResultFilter" onchange="handleGlobalResultFilter()">
+              <option value="ALL">All Results</option>
+              <option value="STUDENT">Student Accounts</option>
+              <option value="ADMIN">Admin Accounts</option>
+              <option value="SCORE_DESC">Score: High to Low</option>
+              <option value="SCORE_ASC">Score: Low to High</option>
+              <option value="THIS_MONTH">This Month</option>
+              <option value="LAST_MONTH">Last Month</option>
+              <option value="DATE_RANGE">Custom Date Range</option>
+            </select>
+            <div id="globalDateRange" class="date-range-fields" style="display:none">
+              <input type="date" id="globalDateFrom" onchange="renderAdminResults()">
+              <input type="date" id="globalDateTo" onchange="renderAdminResults()">
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap"><table class="results-table"><thead><tr><th>Student</th><th>Role</th><th>Exam</th><th>Status</th><th>Score / Progress</th><th>Time Consumed</th></tr></thead><tbody id="admin-results-table-body"><tr><td colspan="6">Select Global Results to load records.</td></tr></tbody></table></div>
+      </section>
+
+
+      <section id="tab-users" class="dash-tab-content" style="display:none">
+        <div class="section-heading">
+          <div><h3>Registered Accounts</h3><p>Review student and administrator accounts.</p></div>
+          <button class="mini-icon-btn labeled" onclick="loadAdminUsers()"><i data-lucide="refresh-cw"></i> Reload</button>
+        </div>
+        <div class="account-filter-stack">
+          <label for="accountFilter">Filter / Sort Accounts</label>
+          <select id="accountFilter" onchange="handleAccountFilter()">
+            <option value="ALL">All Accounts</option>
+            <option value="STUDENT">Student Accounts</option>
+            <option value="ADMIN">Admin Accounts</option>
+            <option value="THIS_MONTH">Registered This Month</option>
+            <option value="LAST_MONTH">Registered Last Month</option>
+            <option value="NEWEST">Newest First</option>
+            <option value="OLDEST">Oldest First</option>
+            <option value="DATE_RANGE">Custom Date Range</option>
+          </select>
+          <div id="accountDateRange" class="date-range-fields" style="display:none">
+            <input type="date" id="accountDateFrom" onchange="renderAdminUsers()">
+            <input type="date" id="accountDateTo" onchange="renderAdminUsers()">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="results-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Account Created</th><th>Password</th><th>Actions</th></tr></thead>
+            <tbody id="admin-users-table-body"><tr><td colspan="6">Loading accounts…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tab-admins" class="dash-tab-content" style="display:none">
+        <div class="section-heading"><div><h3>Add Administrator</h3><p>Create a new account with administrative privileges.</p></div></div>
+        <div class="dashboard-panel admin-narrow-panel">
+          <form onsubmit="createAdministrator(event)">
+            <div class="form-group"><label>Full Name</label><input type="text" id="newAdminName" required placeholder="Administrator name"></div>
+            <div class="form-group"><label>Email Address</label><input type="email" id="newAdminEmail" required placeholder="admin@example.com"></div>
+            <div class="form-group"><label>Temporary Password</label><div class="password-wrapper"><input type="password" id="newAdminPassword" required minlength="6" placeholder="Minimum 6 characters"><button type="button" class="password-toggle-btn" onclick="togglePasswordDisplay('newAdminPassword', event)"><i data-lucide="eye"></i></button></div></div>
+            <button type="submit" class="btn-primary admin-wide-btn"><i data-lucide="user-plus"></i> Create Administrator</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="tab-profile" class="dash-tab-content" style="display:none">
+        <div class="section-heading"><div><h3>Profile Settings</h3><p>Update administrator details and security password.</p></div></div>
+        <div class="profile-layout-container">
+          <form onsubmit="updateAdminGeneralMetadata(event)" class="profile-section-card">
+            <div class="profile-section-title">General Admin Details</div>
+            <div class="form-group"><label>Full Name</label><input type="text" id="profAdminName" required></div>
+            <div class="form-group"><label>Email Address</label><input type="email" id="profAdminEmail" required></div>
+            <button type="submit" class="btn-primary">Save Admin Info</button>
+          </form>
+          <form onsubmit="updateAdminPasswordSecurityMetric(event)" class="profile-section-card">
+            <div class="profile-section-title">Change Password</div>
+            <div class="form-group"><label>Current Password</label><div class="password-wrapper"><input type="password" id="profAdminCurrentPassword" required><button type="button" class="password-toggle-btn" onclick="togglePasswordDisplay('profAdminCurrentPassword', event)"><i data-lucide="eye"></i></button></div></div>
+            <div class="form-group"><label>New Password</label><div class="password-wrapper"><input type="password" id="profAdminNewPassword" required minlength="6"><button type="button" class="password-toggle-btn" onclick="togglePasswordDisplay('profAdminNewPassword', event)"><i data-lucide="eye"></i></button></div></div>
+            <button type="submit" class="btn-primary">Update Password</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="adminLogoutModalOverlay" class="admin-modal-overlay" style="display:none">
+    <div id="adminLogoutModalCard" class="admin-modal-card">
+      <div class="admin-modal-icon"><i data-lucide="log-out"></i></div>
+      <h3>Exit Admin Portal?</h3>
+      <p>Your administrative login will be cleared from this browser.</p>
+      <div class="admin-modal-actions"><button onclick="confirmAdminLogout()" class="btn-danger">Yes, Logout</button><button onclick="closeAdminLogoutModal()" class="btn-secondary">Cancel</button></div>
+    </div>
+  </div>
+
+  <script src="admin-app.js?v=20260731-features"></script>
+</body>
+</html>
