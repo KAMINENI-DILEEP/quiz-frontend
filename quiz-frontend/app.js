@@ -1,10 +1,8 @@
-const API = "https://quiz-backend-azsp.onrender.com/api";
+const API = "https://quiz-backend-hrjv.onrender.com/api";
 let jwtToken = sessionStorage.getItem('token') || null;
 let clockInterval = null;
 let totalSecondsElapsed = 0;
 let activeExamDurationSeconds = 0;
-let mfaRequiredState = false;
-const EXPECTED_MOCK_OTP = "123456";
 
 const dataCache = {
     dashboard: null,
@@ -37,45 +35,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.lucide) {
         lucide.createIcons();
     }
-    
-    bindOtpGroupInteractions('.mfa-box');
 });
-
-function bindOtpGroupInteractions(selector) {
-    const boxes = document.querySelectorAll(selector);
-    boxes.forEach((box, index) => {
-        box.addEventListener('input', (e) => {
-            if (e.target.value.length === 1 && index < boxes.length - 1) {
-                boxes[index + 1].focus();
-            }
-        });
-        box.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                boxes[index - 1].focus();
-            }
-        });
-        box.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const text = e.clipboardData.getData('text').trim();
-            if (/^\d{6}$/.test(text)) {
-                text.split('').forEach((char, i) => {
-                    if (boxes[i]) boxes[i].value = char;
-                });
-                boxes[boxes.length - 1].focus();
-            }
-        });
-    });
-}
-
-function getOtpValue(selector) {
-    return Array.from(document.querySelectorAll(selector)).map(b => b.value).join('');
-}
 
 function togglePasswordDisplay(fieldId) {
     const passwordInput = document.getElementById(fieldId);
     if (!passwordInput) return;
 
-    // Find the icon element inside the button that was clicked
     const button = event.currentTarget;
     const icon = button ? button.querySelector('i') : null;
 
@@ -91,7 +56,6 @@ function togglePasswordDisplay(fieldId) {
         }
     }
 
-    // Re-initialize Lucide icons so the change renders visually
     if (window.lucide) {
         lucide.createIcons();
     }
@@ -101,14 +65,14 @@ function triggerAuthSlide(isSignUp) {
     const container = document.getElementById('swappingContainer');
     if (container) {
         if (isSignUp) {
-            container.classList.add('active-signup');
+            container.classList.add('right-panel-active', 'active-signup');
         } else {
-            container.classList.remove('active-signup');
+            container.classList.remove('right-panel-active', 'active-signup');
         }
     }
 }
 
-// Direct Password Reset (No OTP required)
+// Direct Password Reset
 async function confirmPasswordReset(e) {
     e.preventDefault();
     const email = document.getElementById('recoveryEmail').value;
@@ -137,7 +101,7 @@ async function confirmPasswordReset(e) {
     }
 }
 
-// Complete Profile Registration directly without OTP
+// Complete Profile Registration with Gender Parameter
 async function appRegister(e) {
     e.preventDefault();
 
@@ -149,6 +113,7 @@ async function appRegister(e) {
                 name: document.getElementById('regName').value,
                 email: document.getElementById('regEmail').value,
                 passwordHash: document.getElementById('regPassword').value,
+                gender: document.getElementById('regGender').value,
                 role: 'STUDENT'
             })
         });
@@ -156,7 +121,7 @@ async function appRegister(e) {
         const data = text ? JSON.parse(text) : {};
         if (!res.ok) throw new Error(data.message || 'Registration failed.');
         alert("Account registered successfully. Please sign in.");
-        toggleAuthForms(false);
+        triggerAuthSlide(false);
     } catch (err) { alert(err.message); }
 }
 
@@ -164,14 +129,9 @@ async function appLogin(e) {
     if (e) e.preventDefault();
 
     let payload = { 
-        authMode: 'EMAIL',
         email: document.getElementById('email').value,
         password: document.getElementById('password').value
     };
-
-    if (mfaRequiredState) {
-        payload.otp = getOtpValue('.mfa-box');
-    }
     
     try {
         const res = await fetch(`${API}/login`, {
@@ -184,42 +144,68 @@ async function appLogin(e) {
         const data = text ? JSON.parse(text) : {};
         if (!res.ok) throw new Error(data.message || 'Login verification failed.');
 
-        if (data.mfaRequired) {
-            mfaRequiredState = true;
-            document.getElementById('mfaContainer').style.display = 'block';
-            document.getElementById('btnLoginSubmit').innerText = "Verify 2FA Code & Sign In";
-            setTimeout(() => {
-                const firstMfaBox = document.getElementById('mfa_0');
-                if (firstMfaBox) firstMfaBox.focus();
-            }, 50);
-            return;
-        }
+        jwtToken = data.token;
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('role', data.role);
+        sessionStorage.setItem('name', data.name || 'Student');
+        sessionStorage.setItem('email', data.email || payload.email);
 
         if (data.role === 'ADMIN') {
+            sessionStorage.setItem('adminToken', data.token);
             window.location.href = "admin.html";
             return;
         }
         
-        jwtToken = data.token;
-        sessionStorage.setItem('token', data.token);
-
-        document.getElementById('usrName').innerText = data.name || 'Student';
-        document.getElementById('profStudentName').value = data.name || '';
-        document.getElementById('profStudentEmail').value = data.email || payload.email || '';
-
-        const mfaToggle = document.getElementById('mfaToggle');
-        if (mfaToggle) mfaToggle.checked = !!data.mfaEnabled;
+        const usrNameEl = document.getElementById('usrName');
+        if (usrNameEl) usrNameEl.innerText = data.name || 'Student';
+        
+        const profNameEl = document.getElementById('profStudentName');
+        if (profNameEl) profNameEl.value = data.name || '';
+        
+        const profEmailEl = document.getElementById('profStudentEmail');
+        if (profEmailEl) profEmailEl.value = data.email || payload.email || '';
 
         const eb = document.getElementById('errBlock');
         if (eb) eb.style.display = 'none';
 
-        showDashboardView();
+        window.location.href = "student.html";
     } catch (err) {
         const eb = document.getElementById('errBlock');
         if (eb) {
             eb.innerText = err.message;
             eb.style.display = 'block';
         }
+    }
+}
+
+async function appAdminLogin(e) {
+    if (e) e.preventDefault();
+    const email = document.getElementById('adminEmail').value;
+    const password = document.getElementById('adminPassword').value;
+
+    try {
+        const res = await fetch(`${API}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+
+        if (!res.ok) throw new Error(data.message || 'Admin authentication failed.');
+        if (data.role !== 'ADMIN') throw new Error('Unauthorized: Administrative privileges required.');
+
+        jwtToken = data.token;
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('role', data.role);
+        sessionStorage.setItem('name', data.name || 'Admin');
+        sessionStorage.setItem('email', data.email || email);
+
+        sessionStorage.setItem('adminToken', data.token);
+        window.location.href = "admin.html";
+    } catch (err) {
+        alert(err.message);
     }
 }
 
@@ -232,7 +218,10 @@ async function showDashboardView() {
 
     try {
         const res = await fetch(`${API}/student/results`, {
-            headers: { 'Authorization': `Bearer ${jwtToken}` }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}` 
+            }
         });
         
         if (!res.ok) throw new Error("Dashboard fetch error");
@@ -274,7 +263,10 @@ async function startExamEngine(id) {
         }
 
         const res = await fetch(`${API}/student/exams/${id}/start`, {
-            headers: { 'Authorization': `Bearer ${jwtToken}` }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}` 
+            }
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
@@ -420,23 +412,6 @@ async function updateStudentPasswordSecurityMetric(e) {
     } catch (err) { alert(err.message); }
 }
 
-async function toggleMfaSetting(enabled) {
-    try {
-        const res = await fetch(`${API}/profile/toggle-mfa`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${jwtToken}`
-            },
-            body: JSON.stringify({ mfaEnabled: enabled })
-        });
-        const text = await res.text();
-        const data = text ? JSON.parse(text) : {};
-        if (!res.ok) throw new Error(data.message || 'Toggle failed.');
-        alert(`Two-Factor Authentication is now ${enabled ? 'ENABLED' : 'DISABLED'}.`);
-    } catch (err) { alert(err.message); }
-}
-
 function openLogoutModal() {
     const overlay = document.getElementById('logoutModalOverlay');
     if (overlay) {
@@ -461,7 +436,6 @@ function closeLogoutModal() {
 
 function confirmApplicationLogout() {
     jwtToken = null;
-    mfaRequiredState = false;
     sessionStorage.clear();
     closeLogoutModal();
     routeTo('vAuthSpace');

@@ -1,17 +1,17 @@
 :root {
-    --bg-app: linear-gradient(135deg, #090a0f 0%, #131826 50%, #07090e 100%);
-    --surface: rgba(18, 22, 31, 0.90);
-    --surface-card: rgba(24, 29, 40, 0.95);
-    --primary: #6366f1;
-    --primary-hover: #4f46e5;
+    --bg-app: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #04060a 100%);
+    --surface: rgba(15, 23, 42, 0.92);
+    --surface-card: rgba(30, 41, 59, 0.85);
+    --primary: #10b981;
+    --primary-hover: #059669;
     --secondary: #94a3b8;
     --success: #10b981;
-    --neon-accent: #06b6d4;
+    --neon-accent: #34d399;
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
-    --border: rgba(99, 102, 241, 0.25);
+    --border: rgba(16, 185, 129, 0.25);
     --radius: 24px;
-    --shadow: 0 25px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     --transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
@@ -40,7 +40,7 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus, 
 input:-webkit-autofill:active {
     -webkit-text-fill-color: #ffffff !important;
-    -webkit-box-shadow: 0 0 0px 1000px #181d28 inset !important;
+    -webkit-box-shadow: 0 0 0px 1000px #1e293b inset !important;
     transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -61,18 +61,7 @@ input:-webkit-autofill:active {
     height: 520px !important;
 }
 
-.portal-container:has(.data-table), 
-.wrapper:has(.data-table),
-.portal-container:has(#dynamicQuestionsContainer), 
-.wrapper:has(#dynamicQuestionsContainer),
-.portal-container:has(.profile-layout-container),
-.wrapper:has(.profile-layout-container) {
-    max-width: 980px;
-    height: auto !important;
-    padding: 2.5rem !important;
-}
-
-/* Swapping Container Architecture */
+/* Swapping Container Architecture (Fixed active-signup class trigger) */
 .swapping-container {
     position: relative;
     width: 100%;
@@ -102,8 +91,29 @@ input:-webkit-autofill:active {
     align-items: center;
     text-align: center;
 }
+.btn-admin-pill {
+    background: rgba(16, 185, 129, 0.12) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--neon-accent) !important;
+    padding: 0.25rem 0.6rem !important;
+    border-radius: 20px !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    cursor: pointer !important;
+    transition: var(--transition) !important;
+    flex-shrink: 0 !important;
+}
 
-/* Default States: Sign In is on Left, Sign Up is hidden on Right */
+.btn-admin-pill:hover {
+    background: var(--primary) !important;
+    color: #fff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+
 .sign-in-form-container {
     left: 0;
     z-index: 2;
@@ -120,7 +130,7 @@ input:-webkit-autofill:active {
     pointer-events: none;
 }
 
-/* Active Slide Transition States (Sliding to reveal Create Account on Right) */
+/* Active Slide Transition States matching JS toggleAuthSlide */
 .swapping-container.active-signup .sign-in-form-container {
     transform: translateX(-100%);
     opacity: 0;
@@ -159,7 +169,7 @@ input:-webkit-autofill:active {
     left: -100%;
     height: 100%;
     width: 200%;
-    background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%);
+    background: linear-gradient(135deg, #065f46 0%, #047857 50%, #0f172a 100%);
     color: #fff;
     transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     transform: translateX(0);
@@ -194,15 +204,8 @@ input:-webkit-autofill:active {
     color: rgba(255, 255, 255, 0.85);
 }
 
-.toggle-left {
-    left: 0;
-    transform: translateX(0);
-}
-
-.toggle-right {
-    right: 0;
-    transform: translateX(0);
-}
+.toggle-left { left: 0; transform: translateX(0); }
+.toggle-right { right: 0; transform: translateX(0); }
 
 /* GPU Hardware-Accelerated View Switching */
 .view {
@@ -218,14 +221,8 @@ input:-webkit-autofill:active {
 }
 
 @keyframes smoothReveal {
-    from {
-        opacity: 0;
-        transform: translateY(8px) scale(0.99);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    from { opacity: 0; transform: translateY(8px) scale(0.99); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 h2 {
@@ -268,17 +265,15 @@ textarea {
     transition: var(--transition);
 }
 
-input:focus, 
-select:focus, 
-textarea:focus {
+input:focus, select:focus, textarea:focus {
     outline: none;
-    background: rgba(24, 29, 40, 0.95) !important;
+    background: rgba(30, 41, 59, 0.95) !important;
     color: #ffffff !important;
     border-color: var(--neon-accent);
-    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.25);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25);
 }
 
-/* Precise Password Wrapper & Eye Icon Positioning Fix */
+/* Precise Password Wrapper & Eye Icon */
 .password-wrapper {
     position: relative !important;
     width: 100% !important;
@@ -300,7 +295,6 @@ textarea:focus {
     transform: translateY(-50%) !important;
     background: transparent !important;
     border: none !important;
-    box-shadow: none !important;
     color: var(--text-muted) !important;
     cursor: pointer !important;
     padding: 0 !important;
@@ -312,9 +306,7 @@ textarea:focus {
     width: 24px !important;
 }
 
-.password-toggle-btn:hover {
-    color: var(--neon-accent) !important;
-}
+.password-toggle-btn:hover { color: var(--neon-accent) !important; }
 
 /* Social Icon Row */
 .social-container {
@@ -353,7 +345,7 @@ button, .btn-primary {
     cursor: pointer;
     font-weight: 700;
     font-size: 0.9rem;
-    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
     transition: var(--transition);
     display: inline-flex;
     align-items: center;
@@ -364,13 +356,11 @@ button, .btn-primary {
 
 button:hover, .btn-primary:hover {
     background: var(--primary-hover);
-    box-shadow: 0 15px 30px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 15px 30px rgba(16, 185, 129, 0.5);
     transform: translateY(-2px);
 }
 
-button:active { 
-    transform: scale(0.98) !important; 
-}
+button:active { transform: scale(0.98) !important; }
 
 button.btn-success {
     background: var(--success) !important;
@@ -399,9 +389,7 @@ button.btn-secondary {
     box-shadow: none;
 }
 
-button.btn-secondary:hover { 
-    background: rgba(255, 255, 255, 0.1); 
-}
+button.btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
 
 .btn-outline-custom {
     background: transparent;
@@ -415,27 +403,47 @@ button.btn-secondary:hover {
     width: auto;
 }
 
-.btn-outline-custom:hover {
-    background: #fff;
-    color: var(--primary);
+.btn-outline-custom:hover { background: #fff; color: var(--primary); }
+
+/* Admin Portal Button-Pill Styling */
+.btn-admin-pill {
+    background: rgba(16, 185, 129, 0.12) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--neon-accent) !important;
+    padding: 0.35rem 0.75rem !important;
+    border-radius: 20px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    width: auto !important;
+    box-shadow: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    cursor: pointer !important;
+    transition: var(--transition) !important;
+}
+
+.btn-admin-pill:hover {
+    background: var(--primary) !important;
+    color: #fff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
 }
 
 button.switch-auth-link, .switch-auth-link {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    color: var(--neon-accent) !important;
+    color: var(--text-muted) !important;
     font-weight: 600;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     text-decoration: underline;
-    padding: 0.25rem 0.5rem;
+    padding: 0.2rem 0;
     display: inline-block;
 }
 
-button.switch-auth-link:hover, .switch-auth-link:hover {
-    color: #22d3ee !important;
-}
+button.switch-auth-link:hover, .switch-auth-link:hover { color: var(--neon-accent) !important; }
 
 /* Navbar & Card System */
 .navbar {
@@ -450,10 +458,7 @@ button.switch-auth-link:hover, .switch-auth-link:hover {
     box-shadow: var(--shadow);
 }
 
-.navbar h2 { 
-    font-size: 1.2rem; 
-    margin-bottom: 0 !important; 
-}
+.navbar h2 { font-size: 1.2rem; margin-bottom: 0 !important; }
 
 .card {
     border: 1px solid var(--border);
