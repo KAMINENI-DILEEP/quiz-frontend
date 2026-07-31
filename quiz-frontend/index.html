@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExamPro Portal Gateway</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div id="errBlock" class="err"></div>
+
+        <!-- Sliding Auth Workspace Container -->
+        <div id="vAuthSpace" class="view active">
+            <div class="swapping-container" id="swappingContainer">
+
+                <!-- TOGGLE OVERLAY PANEL -->
+                <div class="toggle-container">
+                    <div class="toggle-panel">
+                        <div class="toggle-panel-content toggle-left">
+                            <h2>Welcome Back!</h2>
+                            <p>To keep connected with us please login with your personal info</p>
+                            <button class="btn-outline-custom" onclick="triggerAuthSlide(false)">Sign In</button>
+                        </div>
+                        <div class="toggle-panel-content toggle-right">
+                            <h2>Hello, Friend!</h2>
+                            <p>Enter your personal details and start your journey with us</p>
+                            <button class="btn-outline-custom" onclick="triggerAuthSlide(true)">Create Account</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIGN IN FORM PANEL -->
+                <div class="form-container sign-in-form-container">
+                    <form onsubmit="appLogin(event)">
+                        <!-- Header row with Sign In title and Admin Portal button side by side -->
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 0.5rem;">
+                            <h2 style="margin: 0;">Sign In</h2>
+
+                        </div>
+
+                        <div class="social-container">
+                            <a href="#" class="social-icon"><i data-lucide="globe"></i></a>
+                            <a href="#" class="social-icon"><i data-lucide="code"></i></a>
+                            <a href="#" class="social-icon"><i data-lucide="terminal"></i></a>
+                        </div>
+                        <span style="font-size:0.75rem; color:var(--text-muted); margin: 4px 0;">or use your account
+                            email</span>
+
+                        <div class="form-group" style="width:100%;">
+                            <input type="email" id="email" required placeholder="Email Address">
+                        </div>
+                        <div class="form-group" style="width:100%;">
+                            <div class="password-wrapper">
+                                <input type="password" id="password" required placeholder="Password">
+                                <button type="button" class="password-toggle-btn"
+                                    onclick="togglePasswordDisplay('password')">
+                                    <i data-lucide="eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin: 0.75rem 0;">
+                            <button type="button" class="switch-auth-link" onclick="routeTo('vForgotPassword')"
+                                style="background: none; border: none; cursor: pointer; padding: 0;">Forgot
+                                Password?</button>
+                            <a href="admin.html" class="btn-admin-pill"
+                                style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                <i data-lucide="shield-check"
+                                    style="width: 14px; height: 14px; pointer-events: none;"></i> Admin Portal
+                            </a>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="width:100%;">Sign In</button>
+                    </form>
+                </div>
+
+                <!-- REGISTRATION FORM PANEL -->
+                <div class="form-container sign-up-form-container">
+                    <form onsubmit="appRegister(event)">
+                        <h2>Create Account</h2>
+                        <div class="social-container">
+                            <a href="#" class="social-icon"><i data-lucide="globe"></i></a>
+                            <a href="#" class="social-icon"><i data-lucide="code"></i></a>
+                            <a href="#" class="social-icon"><i data-lucide="terminal"></i></a>
+                        </div>
+                        <span style="font-size:0.75rem; color:var(--text-muted); margin: 2px 0;">or use your email for
+                            registration</span>
+
+                        <div class="form-group" style="width:100%; margin-bottom: 0.4rem;">
+                            <input type="text" id="regName" required placeholder="Full Name">
+                        </div>
+                        <div class="form-group" style="width:100%; margin-bottom: 0.4rem;">
+                            <input type="email" id="regEmail" required placeholder="Email Address">
+                        </div>
+                        <div class="form-group" style="width:100%; margin-bottom: 0.4rem;">
+                            <div class="password-wrapper">
+                                <input type="password" id="regPassword" required placeholder="Password">
+                                <button type="button" class="password-toggle-btn"
+                                    onclick="togglePasswordDisplay('regPassword')">
+                                    <i data-lucide="eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group" style="width:100%; margin-bottom: 0.4rem; text-align: left;">
+                            <select id="regGender" style="width:100%;">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-success" style="width:100%; margin-top:0.2rem;">Register
+                            Profile</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- View: Self-Service Password Reset Window -->
+        <div id="vForgotPassword" class="view">
+            <h2>Account Credential Recovery</h2>
+            <div class="card" style="max-width: 450px; margin: auto;">
+                <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.95rem;">Enter your profile email
+                    address to reset your password directly.</p>
+
+                <form onsubmit="confirmPasswordReset(event)">
+                    <div class="form-group">
+                        <label>Registered Email Address</label>
+                        <input type="email" id="recoveryEmail" required placeholder="john@edu.com" style="width: 100%;">
+                    </div>
+
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label>New System Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="newAccountPassword" required placeholder="Enter new password">
+                            <button type="button" class="password-toggle-btn"
+                                onclick="togglePasswordDisplay('newAccountPassword')">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-success" style="width: 100%; margin-top: 1rem;">Reset
+                        Password</button>
+                </form>
+
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button type="button" class="btn-secondary" onclick="routeTo('vAuthSpace')"
+                        style="width: 100%;">Return to Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 2: Student Dashboard -->
+        <div id="vDash" class="view">
+            <div class="navbar"
+                style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-card); padding:1.25rem; border-radius:16px; border:1px solid var(--border); margin-bottom:1.5rem;">
+                <h2>Student Portal Space</h2>
+                <div style="display:flex; gap:0.75rem;">
+                    <button onclick="openStudentProfileSettings()" class="btn-success">Profile Settings</button>
+                    <button onclick="openLogoutModal()" class="btn-danger">Logout Session</button>
+                </div>
+            </div>
+            <p style="margin: 1rem 0 1.5rem 0;">Welcome, <span id="usrName"
+                    style="font-weight:bold; color:var(--success);"></span></p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div class="card" style="padding: 1.5rem;">
+                    <h3 style="font-size: 1rem; margin-bottom: 0.75rem; display:flex; align-items:center; gap:0.5rem;">
+                        <i data-lucide="trending-up"></i> My Learning Progress
+                    </h3>
+                    <div
+                        style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+                        <span>Exams Completed Ratio</span>
+                        <span id="progress-text">75%</span>
+                    </div>
+                    <div
+                        style="width: 100%; background: #0f172a; border-radius: 9999px; height: 10px; overflow: hidden; border:1px solid var(--border);">
+                        <div id="progress-bar"
+                            style="background: var(--success); height: 100%; width: 75%; transition: width 0.5s ease;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding: 1.5rem;">
+                    <h3 style="font-size: 1rem; margin-bottom: 0.75rem; display:flex; align-items:center; gap:0.5rem;">
+                        <i data-lucide="award"></i> Live Leaderboard
+                    </h3>
+                    <div id="leaderboard-list" style="font-size: 0.85rem; max-height: 90px; overflow-y: auto;">
+                        <div style="color: var(--text-muted);">Syncing live ranks...</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Your Assigned Exams</h3>
+            <div id="examList" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- View: Student Profile Settings -->
+        <div id="vStudentProfile" class="view">
+            <div class="navbar"
+                style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-card); padding:1.25rem; border-radius:16px; border:1px solid var(--border); margin-bottom:1.5rem;">
+                <h2>Student Profile Management</h2>
+                <button onclick="showDashboardView()" class="btn-secondary">Back to Dashboard</button>
+            </div>
+
+            <div class="card">
+                <form onsubmit="updateStudentGeneralMetadata(event)">
+                    <div class="form-group"><label>Full Name</label><input type="text" id="profStudentName" required>
+                    </div>
+                    <div class="form-group"><label>Email Address</label><input type="email" id="profStudentEmail"
+                            required></div>
+                    <button type="submit" class="btn-success">Save General Details</button>
+                </form>
+
+                <form onsubmit="updateStudentPasswordSecurityMetric(event)"
+                    style="margin-top: 1.5rem; border-top:1px solid var(--border); padding-top:1.5rem;">
+                    <div class="form-group">
+                        <label>Current Validation Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="profStudentCurrentPassword" required
+                                placeholder="Verify existing authentication key">
+                            <button type="button" class="password-toggle-btn"
+                                onclick="togglePasswordDisplay('profStudentCurrentPassword')">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>New System Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="profStudentNewPassword" required
+                                placeholder="Enter alternative access token">
+                            <button type="button" class="password-toggle-btn"
+                                onclick="togglePasswordDisplay('profStudentNewPassword')">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-danger">Update System Password</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- View 3: Exam Workspace -->
+        <div id="vExam" class="view">
+            <div class="navbar"
+                style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-card); padding:1.25rem; border-radius:16px; border:1px solid var(--border); margin-bottom:1.5rem;">
+                <h2 id="examTitle">Assessment View</h2>
+                <div id="clock"
+                    style="font-size:1.25rem; font-weight:800; background:rgba(16,185,129,0.2); padding:0.4rem 0.8rem; border-radius:8px; border:1px solid var(--success);">
+                    00:00</div>
+            </div>
+            <form onsubmit="submitExamPayload(event)">
+                <div id="questionsContainer"></div>
+                <button type="submit" class="btn-danger" style="width:100%; margin-top:1.5rem;">Finish & Submit</button>
+            </form>
+        </div>
+
+        <!-- View 4: Grades Metric Frame -->
+        <div id="vResult" class="view">
+            <h2>Performance Grade Generated</h2>
+            <div class="card" style="text-align:center; margin-top:2rem;">
+                <p style="font-size:1.1rem; color:var(--text-muted)">Your Score Calculation</p>
+                <h1 id="scoreMetric" style="font-size:4rem; color:var(--success); margin:1rem 0;">0.00%</h1>
+                <p>Total time spent tracking: <span id="timeMetric" style="font-weight:bold;">0</span> seconds.</p>
+            </div>
+            <button onclick="showDashboardView()" class="btn-success" style="width:100%; margin-top:1rem;">Back to
+                Dashboard</button>
+        </div>
+
+    </div>
+
+    <!-- Logout Modal Overlay -->
+    <div id="logoutModalOverlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 13, 22, 0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
+        <div id="logoutModalCard"
+            style="background: var(--surface-card); border:1px solid var(--border); padding: 2.5rem; border-radius: 20px; box-shadow: var(--shadow); text-align: center; max-width: 400px; width: 90%; transform: scale(0.85); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <h3 style="color: #ffffff; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 800;">Terminate Session?
+            </h3>
+            <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Are you sure you want to exit
+                your portal session?</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button onclick="confirmApplicationLogout()" class="btn-danger" style="padding: 0.75rem 1.5rem;">Yes,
+                    Logout</button>
+                <button onclick="closeLogoutModal()" class="btn-secondary"
+                    style="padding: 0.75rem 1.5rem;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=20260731-2"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+
+</body>
+
+</html>
