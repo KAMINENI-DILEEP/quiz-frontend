@@ -8,7 +8,6 @@ const dataCache = {
     dashboard: null,
     exams: {}
 };
-
 function routeTo(viewId) {
     requestAnimationFrame(() => {
         const views = document.querySelectorAll('.view');
