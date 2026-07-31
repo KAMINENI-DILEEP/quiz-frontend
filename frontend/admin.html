@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+    <!-- Sidebar Control Panel -->
+    <aside class="w-64 glass-card border-r border-slate-700 p-6 flex flex-col space-y-4">
+        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Admin Control Panel</h2>
+        <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-indigo-600/30 text-indigo-300">
+            <i class="fa-solid fa-table-list"></i> <span>Results & Sorting</span>
+        </a>
+    </aside>
+
+    <!-- Content Panel -->
+    <main class="flex-1 p-8 overflow-y-auto">
+        <div class="flex justify-between items-center bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6">
+            <h3 class="text-lg font-bold">Student Results Tracking</h3>
+            <div class="flex space-x-4">
+                <select id="filter-gender" onchange="fetchAdminResults()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    <option value="ALL">All Genders</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+                <select id="sort-order" onchange="fetchAdminResults()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    <option value="high-to-low">Score: High to Low</option>
+                    <option value="low-to-high">Score: Low to High</option>
+                </select>
+            </div>
+        </div>
+        <div class="glass-card rounded-xl overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-900/50 text-slate-400 border-b border-slate-700 text-xs uppercase">
+                    <tr>
+                        <th class="p-4">Student Name</th>
+                        <th class="p-4">Gender</th>
+                        <th class="p-4">Score</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-results-table-body" class="divide-y divide-slate-700/50"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        async function fetchAdminResults() {
+            const gender = document.getElementById('filter-gender').value;
+            const sort = document.getElementById('sort-order').value;
+            const res = await fetch(`/api/admin/results?gender=${gender}&sort=${sort}`);
+            const data = await res.json();
+            document.getElementById('admin-results-table-body').innerHTML = data.map(r => `
+                <tr class="hover:bg-slate-800/30">
+                    <td class="p-4">${r.user ? r.user.name : 'N/A'}</td>
+                    <td class="p-4">${r.user ? r.user.gender : 'N/A'}</td>
+                    <td class="p-4 font-bold text-indigo-400">${r.score}</td>
+                </tr>
+            `).join('');
+        }
+        fetchAdminResults();
+    </script>
+</body>
+</html>
