@@ -1,34 +1,54 @@
 const API_BASE = "https://quiz-backend-hrjv.onrender.com/api";
 
-let authToken = sessionStorage.getItem("token");
-let currentRole = sessionStorage.getItem("role");
 let studentResults = [];
 
-// ==========================================
-// INITIALIZATION
-// ==========================================
+// ======================================================
+// INITIALIZATION & AUTHENTICATION
+// ======================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-    // Only redirect when there is genuinely no login session
+    const authToken = sessionStorage.getItem("token");
+
+    const currentRole = String(
+        sessionStorage.getItem("role") || ""
+    ).toUpperCase();
+
+    console.log("STUDENT PAGE LOADED");
+    console.log("Token exists:", !!authToken);
+    console.log("Role:", currentRole);
+
+    // No token = not logged in
     if (!authToken) {
+        console.error("No authentication token found.");
         window.location.replace("index.html");
         return;
     }
 
-    // Normalize role
-    currentRole = (currentRole || "").toUpperCase();
-
-    // Prevent ADMIN from opening student dashboard
+    // Admin should not access student dashboard
     if (currentRole === "ADMIN") {
+        console.log("Admin detected. Redirecting to admin page.");
         window.location.replace("admin.html");
         return;
     }
 
-    // Student role check
+    /*
+     * IMPORTANT:
+     * Never clear sessionStorage automatically here.
+     *
+     * If the role is temporarily unavailable or incorrect,
+     * keep the session so we can diagnose the problem.
+     */
     if (currentRole !== "STUDENT") {
-        sessionStorage.clear();
-        window.location.replace("index.html");
+        console.error(
+            "Unexpected account role:",
+            currentRole
+        );
+
+        showDashboardError(
+            "Your login session exists, but the account role could not be verified."
+        );
+
         return;
     }
 
@@ -42,23 +62,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 
-// ==========================================
-// USER INFORMATION
-// ==========================================
+// ======================================================
+// USER IDENTITY
+// ======================================================
 
 function hydrateIdentity() {
 
     const name =
-        sessionStorage.getItem("name") || "Student";
+        sessionStorage.getItem("name") ||
+        "Student";
 
     const email =
-        sessionStorage.getItem("email") || "";
+        sessionStorage.getItem("email") ||
+        "";
 
     const initial =
         (name || email || "S")
             .trim()
             .charAt(0)
             .toUpperCase();
+
 
     ["dashUserName", "sideName"].forEach(id => {
 
@@ -70,6 +93,7 @@ function hydrateIdentity() {
         }
     });
 
+
     ["userAvatarText", "sideAvatar"].forEach(id => {
 
         const element =
@@ -80,23 +104,32 @@ function hydrateIdentity() {
         }
     });
 
-    const emailElement =
-        document.getElementById("navUserEmail");
 
-    if (emailElement) {
-        emailElement.textContent =
+    const navUserEmail =
+        document.getElementById(
+            "navUserEmail"
+        );
+
+    if (navUserEmail) {
+        navUserEmail.textContent =
             email || "Student account";
     }
 
-    const profileName =
-        document.getElementById("profileFullName");
 
-    if (profileName) {
-        profileName.value = name;
+    const profileFullName =
+        document.getElementById(
+            "profileFullName"
+        );
+
+    if (profileFullName) {
+        profileFullName.value = name;
     }
 
+
     const profileEmail =
-        document.getElementById("profileEmail");
+        document.getElementById(
+            "profileEmail"
+        );
 
     if (profileEmail) {
         profileEmail.value = email;
@@ -104,16 +137,39 @@ function hydrateIdentity() {
 }
 
 
-// ==========================================
+// ======================================================
 // LOAD STUDENT DATA
-// ==========================================
+// ======================================================
 
 async function loadStudentData() {
 
-    const examList =
-        document.getElementById("examList");
+    /*
+     * Read the token at request time.
+     * Do not depend on a token captured when JS first loaded.
+     */
+    const authToken =
+        sessionStorage.getItem("token");
+
+    if (!authToken) {
+
+        console.error(
+            "Token missing before student/results request."
+        );
+
+        showDashboardError(
+            "Authentication token is unavailable."
+        );
+
+        return;
+    }
+
 
     try {
+
+        console.log(
+            "Loading student results..."
+        );
+
 
         const res = await fetch(
             `${API_BASE}/student/results`,
@@ -130,41 +186,49 @@ async function loadStudentData() {
             }
         );
 
+
+        console.log(
+            "student/results status:",
+            res.status
+        );
+
+
         /*
-         * IMPORTANT
+         * IMPORTANT:
          *
-         * Do NOT automatically clear session
-         * for every 403.
+         * DO NOT clear sessionStorage for
+         * 401 or 403 responses.
          *
-         * 403 can mean a Spring Security
-         * authority configuration problem.
+         * This prevents automatic logout.
          */
 
         if (res.status === 401) {
 
             console.error(
-                "JWT rejected by backend."
+                "Backend returned 401 Unauthorized."
             );
 
             showDashboardError(
-                "Your authentication token was rejected. Please sign in again."
+                "The backend rejected your authentication token. Please check the JWT configuration."
             );
 
             return;
         }
+
 
         if (res.status === 403) {
 
             console.error(
-                "Student API returned 403 Forbidden."
+                "Backend returned 403 Forbidden."
             );
 
             showDashboardError(
-                "Your account is logged in, but the server denied access to student records."
+                "You are logged in, but the backend denied access to student records."
             );
 
             return;
         }
+
 
         if (!res.ok) {
 
@@ -173,79 +237,138 @@ async function loadStudentData() {
 
             throw new Error(
                 errorData.message ||
-                `Unable to load examination data (${res.status}).`
+                `Could not load examination data. HTTP ${res.status}`
             );
         }
 
+
         const data =
             await res.json();
+
 
         studentResults =
             Array.isArray(data)
                 ? data
                 : [];
 
+
+        console.log(
+            "Student results loaded:",
+            studentResults.length
+        );
+
+
         renderStudentDashboard();
+
 
     } catch (err) {
 
         console.error(
-            "Student dashboard error:",
+            "Student dashboard request failed:",
             err
         );
 
-        if (examList) {
 
-            examList.innerHTML = `
-                <div class="dashboard-panel error-cell">
-                    ${escapeHtml(err.message)}
-                </div>
-            `;
-        }
+        showDashboardError(
+            err.message ||
+            "Unable to load student dashboard."
+        );
     }
 }
 
 
-// ==========================================
+// ======================================================
 // ERROR DISPLAY
-// ==========================================
+// ======================================================
 
 function showDashboardError(message) {
 
+    console.error(message);
+
     const examList =
-        document.getElementById("examList");
+        document.getElementById(
+            "examList"
+        );
+
 
     if (examList) {
 
         examList.innerHTML = `
+
             <div class="dashboard-panel error-cell">
-                <strong>Unable to load dashboard data</strong>
-                <p>${escapeHtml(message)}</p>
+
+                <strong>
+                    Unable to load dashboard data
+                </strong>
+
+                <p>
+                    ${escapeHtml(message)}
+                </p>
+
             </div>
         `;
     }
 }
 
 
-// ==========================================
-// UPDATE PROFILE
-// ==========================================
+// ======================================================
+// PROFILE UPDATE
+// ======================================================
 
 async function updateStudentProfile(e) {
 
-    e.preventDefault();
+    if (e) {
+        e.preventDefault();
+    }
+
+
+    const authToken =
+        sessionStorage.getItem("token");
+
+
+    if (!authToken) {
+
+        alert(
+            "Authentication token is unavailable."
+        );
+
+        return;
+    }
+
+
+    const nameElement =
+        document.getElementById(
+            "profileFullName"
+        );
+
+
+    const emailElement =
+        document.getElementById(
+            "profileEmail"
+        );
+
+
+    if (!nameElement || !emailElement) {
+        return;
+    }
+
 
     const name =
-        document
-            .getElementById("profileFullName")
-            .value
-            .trim();
+        nameElement.value.trim();
 
     const email =
-        document
-            .getElementById("profileEmail")
-            .value
-            .trim();
+        emailElement.value.trim();
+
+
+    if (!name || !email) {
+
+        alert(
+            "Name and email are required."
+        );
+
+        return;
+    }
+
 
     try {
 
@@ -269,22 +392,26 @@ async function updateStudentProfile(e) {
             }
         );
 
+
         const data =
             await safeJson(res);
+
 
         if (res.status === 401) {
 
             throw new Error(
-                "Authentication expired. Please sign in again."
+                "Authentication token was rejected."
             );
         }
+
 
         if (res.status === 403) {
 
             throw new Error(
-                "Server denied permission to update this profile."
+                "Server denied permission to update your profile."
             );
         }
+
 
         if (!res.ok) {
 
@@ -294,52 +421,67 @@ async function updateStudentProfile(e) {
             );
         }
 
+
         sessionStorage.setItem(
             "name",
             name
         );
+
 
         sessionStorage.setItem(
             "email",
             email
         );
 
+
         hydrateIdentity();
+
 
         alert(
             "Profile updated successfully."
         );
 
+
     } catch (err) {
+
+        console.error(
+            "Profile update error:",
+            err
+        );
 
         alert(err.message);
     }
 }
 
 
-// ==========================================
-// DASHBOARD
-// ==========================================
+// ======================================================
+// DASHBOARD METRICS
+// ======================================================
 
 function renderStudentDashboard() {
 
     const completed =
         studentResults.filter(
             item =>
-                String(item.status)
-                    .toUpperCase() ===
+                String(
+                    item.status || ""
+                ).toUpperCase() ===
                 "COMPLETED"
         );
 
-    const avg =
+
+    const averageScore =
         completed.length
             ? completed.reduce(
                 (sum, item) =>
                     sum +
-                    Number(item.score || 0),
+                    Number(
+                        item.score || 0
+                    ),
                 0
             ) / completed.length
             : 0;
+
 
     const progress =
         studentResults.length
@@ -357,59 +499,72 @@ function renderStudentDashboard() {
         studentResults.length
     );
 
+
     setText(
         "statVal2",
         completed.length
     );
 
+
     setText(
         "statVal3",
-        `${avg.toFixed(1)}%`
+        `${averageScore.toFixed(1)}%`
     );
+
 
     setText(
         "progress-percent-text",
         `${progress}%`
     );
 
+
     const progressBar =
         document.getElementById(
             "progress-bar-fill"
         );
+
 
     if (progressBar) {
         progressBar.style.width =
             `${progress}%`;
     }
 
+
     setText(
         "progress-caption",
         `${completed.length} of ${studentResults.length} assigned exams completed.`
     );
 
+
     renderExamList();
+
     renderRecent();
+
     renderNextExam();
 }
 
 
-// ==========================================
+// ======================================================
 // EXAM LIST
-// ==========================================
+// ======================================================
 
 function renderExamList() {
 
-    const el =
+    const element =
         document.getElementById(
             "examList"
         );
 
-    if (!el) return;
+
+    if (!element) {
+        return;
+    }
 
 
     if (!studentResults.length) {
 
-        el.innerHTML = `
+        element.innerHTML = `
+
             <div class="dashboard-panel empty-state">
 
                 <i data-lucide="inbox"></i>
@@ -425,241 +580,301 @@ function renderExamList() {
             </div>
         `;
 
-        if (window.lucide) {
-            lucide.createIcons();
-        }
+
+        refreshIcons();
 
         return;
     }
 
 
-    el.innerHTML =
+    element.innerHTML =
         studentResults
             .map(item => {
 
                 const done =
-                    String(item.status)
-                        .toUpperCase() ===
+                    String(
+                        item.status || ""
+                    ).toUpperCase() ===
                     "COMPLETED";
+
 
                 const id =
                     examId(item);
 
+
+                const title =
+                    examName(item);
+
+
                 return `
 
-                <article class="exam-card">
+                    <article class="exam-card">
 
-                    <div class="exam-card-top">
+                        <div class="exam-card-top">
 
-                        <span class="status-badge ${done ? "completed" : "pending"}">
+                            <span
+                                class="status-badge ${
+                                    done
+                                        ? "completed"
+                                        : "pending"
+                                }"
+                            >
+
+                                ${
+                                    done
+                                        ? "Completed"
+                                        : "Pending"
+                                }
+
+                            </span>
+
+
+                            <span class="exam-ref">
+
+                                #${escapeHtml(
+                                    id ?? "—"
+                                )}
+
+                            </span>
+
+                        </div>
+
+
+                        <h4>
+
+                            ${escapeHtml(
+                                title
+                            )}
+
+                        </h4>
+
+
+                        <p>
 
                             ${
                                 done
-                                    ? "Completed"
-                                    : "Pending"
+                                    ? `
+                                        Final score:
+                                        <strong>
+                                            ${Number(
+                                                item.score || 0
+                                            ).toFixed(1)}%
+                                        </strong>
+                                    `
+                                    : `
+                                        This assessment is ready when you are.
+                                    `
                             }
 
-                        </span>
-
-                        <span class="exam-ref">
-                            #${escapeHtml(id ?? "—")}
-                        </span>
-
-                    </div>
+                        </p>
 
 
-                    <h4>
-                        ${escapeHtml(
-                            examName(item)
-                        )}
-                    </h4>
+                        <div class="exam-card-footer">
 
+                            ${
+                                done
 
-                    <p>
+                                    ? `
 
-                        ${
-                            done
-                                ? `Final score: <strong>${Number(item.score || 0).toFixed(1)}%</strong>`
-                                : "This assessment is ready when you are."
-                        }
+                                        <span class="locked-label">
 
-                    </p>
+                                            <i data-lucide="lock"></i>
 
+                                            Submitted
 
-                    <div class="exam-card-footer">
+                                        </span>
+                                    `
 
-                        ${
-                            done
+                                    : `
 
-                                ? `
-                                <span class="locked-label">
-                                    <i data-lucide="lock"></i>
-                                    Submitted
-                                </span>
-                                `
+                                        <button
+                                            type="button"
+                                            class="btn-success compact-btn"
+                                            onclick="startAssignedExam('${escapeJsString(id)}')"
+                                        >
 
-                                : `
-                                <button
-                                    class="btn-success compact-btn"
-                                    onclick="startAssignedExam('${escapeHtml(id)}')">
+                                            <i data-lucide="play"></i>
 
-                                    <i data-lucide="play"></i>
+                                            Start Exam
 
-                                    Start Exam
+                                        </button>
+                                    `
+                            }
 
-                                </button>
-                                `
-                        }
+                        </div>
 
-                    </div>
-
-                </article>
+                    </article>
                 `;
 
             })
             .join("");
 
 
-    if (window.lucide) {
-        lucide.createIcons();
-    }
+    refreshIcons();
 }
 
 
-// ==========================================
+// ======================================================
 // RECENT ACTIVITY
-// ==========================================
+// ======================================================
 
 function renderRecent() {
 
-    const el =
+    const element =
         document.getElementById(
             "recentActivity"
         );
 
-    if (!el) return;
+
+    if (!element) {
+        return;
+    }
 
 
     const rows =
-        studentResults.slice(0, 4);
+        studentResults.slice(
+            0,
+            4
+        );
 
 
     if (!rows.length) {
 
-        el.innerHTML =
-            `<p class="panel-note">
+        element.innerHTML = `
+
+            <p class="panel-note">
                 No activity yet.
-             </p>`;
+            </p>
+        `;
 
         return;
     }
 
 
-    el.innerHTML =
-        rows.map(item => {
+    element.innerHTML =
+        rows
+            .map(item => {
 
-            const done =
-                String(item.status)
-                    .toUpperCase() ===
-                "COMPLETED";
-
-            return `
-
-            <div class="activity-row">
-
-                <div class="activity-icon">
-
-                    <i data-lucide="${
-                        done
-                            ? "check"
-                            : "clock-3"
-                    }"></i>
-
-                </div>
+                const done =
+                    String(
+                        item.status || ""
+                    ).toUpperCase() ===
+                    "COMPLETED";
 
 
-                <div>
+                return `
 
-                    <strong>
-                        ${escapeHtml(
-                            examName(item)
-                        )}
-                    </strong>
+                    <div class="activity-row">
 
-                    <small>
-                        ${escapeHtml(
-                            item.status ||
-                            "PENDING"
-                        )}
-                    </small>
+                        <div class="activity-icon">
 
-                </div>
+                            <i
+                                data-lucide="${
+                                    done
+                                        ? "check"
+                                        : "clock-3"
+                                }"
+                            ></i>
 
-
-                <span>
-
-                    ${
-                        done
-                            ? Number(
-                                item.score || 0
-                            ).toFixed(1) + "%"
-                            : "Pending"
-                    }
-
-                </span>
-
-            </div>
-            `;
-
-        }).join("");
+                        </div>
 
 
-    if (window.lucide) {
-        lucide.createIcons();
-    }
+                        <div>
+
+                            <strong>
+
+                                ${escapeHtml(
+                                    examName(item)
+                                )}
+
+                            </strong>
+
+
+                            <small>
+
+                                ${escapeHtml(
+                                    item.status ||
+                                    "PENDING"
+                                )}
+
+                            </small>
+
+                        </div>
+
+
+                        <span>
+
+                            ${
+                                done
+                                    ? Number(
+                                        item.score || 0
+                                    ).toFixed(1) + "%"
+                                    : "Pending"
+                            }
+
+                        </span>
+
+                    </div>
+                `;
+
+            })
+            .join("");
+
+
+    refreshIcons();
 }
 
 
-// ==========================================
+// ======================================================
 // NEXT EXAM
-// ==========================================
+// ======================================================
 
 function renderNextExam() {
 
-    const el =
+    const element =
         document.getElementById(
             "nextExamCard"
         );
 
-    if (!el) return;
+
+    if (!element) {
+        return;
+    }
 
 
     const pending =
         studentResults.find(
             item =>
-                String(item.status)
-                    .toUpperCase() !==
+                String(
+                    item.status || ""
+                ).toUpperCase() !==
                 "COMPLETED"
         );
 
 
     if (pending) {
 
-        el.innerHTML = `
+        element.innerHTML = `
 
             <strong>
+
                 ${escapeHtml(
                     examName(pending)
                 )}
+
             </strong>
+
 
             <p>
                 Pending assessment ready to start.
             </p>
 
+
             <button
+                type="button"
                 class="btn-success compact-btn"
-                onclick="startAssignedExam('${escapeHtml(examId(pending))}')">
+                onclick="startAssignedExam('${escapeJsString(examId(pending))}')"
+            >
 
                 Open assessment
 
@@ -668,7 +883,7 @@ function renderNextExam() {
 
     } else {
 
-        el.innerHTML = `
+        element.innerHTML = `
 
             <strong>
                 All caught up!
@@ -679,12 +894,15 @@ function renderNextExam() {
             </p>
         `;
     }
+
+
+    refreshIcons();
 }
 
 
-// ==========================================
+// ======================================================
 // TAB NAVIGATION
-// ==========================================
+// ======================================================
 
 function switchStudentTab(
     tab,
@@ -726,12 +944,13 @@ function switchStudentTab(
 
 
     if (target) {
+
         target.style.display =
             "block";
     }
 
 
-    if (e?.currentTarget) {
+    if (e && e.currentTarget) {
 
         e.currentTarget
             .classList
@@ -739,20 +958,20 @@ function switchStudentTab(
     }
 
 
-    if (window.lucide) {
-        lucide.createIcons();
-    }
+    refreshIcons();
 }
 
 
-// ==========================================
-// START EXAM
-// ==========================================
+// ======================================================
+// START ASSIGNED EXAM
+// ======================================================
 
 function startAssignedExam(id) {
 
     if (
-        !id ||
+        id === undefined ||
+        id === null ||
+        id === "" ||
         id === "undefined" ||
         id === "null"
     ) {
@@ -765,27 +984,48 @@ function startAssignedExam(id) {
     }
 
 
-    sessionStorage.setItem(
-        "requestedExamId",
-        id
-    );
+    const authToken =
+        sessionStorage.getItem(
+            "token"
+        );
+
+
+    if (!authToken) {
+
+        alert(
+            "Your login session is unavailable."
+        );
+
+        return;
+    }
 
 
     /*
-     * IMPORTANT:
-     * Do NOT clear session here.
+     * Keep authentication intact.
+     * Only store the requested examination.
      */
+
+    sessionStorage.setItem(
+        "requestedExamId",
+        String(id)
+    );
+
 
     window.location.href =
         `index.html?startExam=${encodeURIComponent(id)}`;
 }
 
 
-// ==========================================
-// LOGOUT
-// ==========================================
+// ======================================================
+// EXPLICIT STUDENT LOGOUT
+// ======================================================
 
 function confirmStudentLogout() {
+
+    /*
+     * Authentication is cleared ONLY when
+     * the user deliberately presses Logout.
+     */
 
     sessionStorage.removeItem(
         "token"
@@ -804,8 +1044,13 @@ function confirmStudentLogout() {
     );
 
     sessionStorage.removeItem(
+        "adminToken"
+    );
+
+    sessionStorage.removeItem(
         "requestedExamId"
     );
+
 
     window.location.replace(
         "index.html"
@@ -813,15 +1058,21 @@ function confirmStudentLogout() {
 }
 
 
-// ==========================================
-// HELPERS
-// ==========================================
+// ======================================================
+// EXAM HELPERS
+// ======================================================
 
 function examName(item) {
+
+    if (!item) {
+        return "Exam";
+    }
+
 
     return (
         item.examTitle ||
         item.exam?.title ||
+        item.title ||
         `Exam #${
             item.examId ??
             item.exam?.id ??
@@ -833,23 +1084,40 @@ function examName(item) {
 
 function examId(item) {
 
+    if (!item) {
+        return null;
+    }
+
+
     return (
         item.examId ??
-        item.exam?.id
+        item.exam?.id ??
+        item.id ??
+        null
     );
 }
 
+
+// ======================================================
+// JSON HELPER
+// ======================================================
 
 async function safeJson(res) {
 
     const text =
         await res.text();
 
+
+    if (!text) {
+        return {};
+    }
+
+
     try {
 
-        return text
-            ? JSON.parse(text)
-            : {};
+        return JSON.parse(
+            text
+        );
 
     } catch {
 
@@ -858,29 +1126,86 @@ async function safeJson(res) {
 }
 
 
-function setText(id, value) {
+// ======================================================
+// TEXT HELPER
+// ======================================================
+
+function setText(
+    id,
+    value
+) {
 
     const element =
         document.getElementById(id);
 
+
     if (element) {
+
         element.textContent =
             value;
     }
 }
 
 
+// ======================================================
+// ICON HELPER
+// ======================================================
+
+function refreshIcons() {
+
+    if (window.lucide) {
+
+        lucide.createIcons();
+    }
+}
+
+
+// ======================================================
+// HTML ESCAPING
+// ======================================================
+
 function escapeHtml(value) {
 
-    return String(value ?? "")
+    return String(
+        value ?? ""
+    ).replace(
+        /[&<>'"]/g,
+        character => ({
+
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "'": "&#39;",
+            '"': "&quot;"
+
+        }[character])
+    );
+}
+
+
+// ======================================================
+// JAVASCRIPT STRING ESCAPING
+// ======================================================
+
+function escapeJsString(value) {
+
+    return String(
+        value ?? ""
+    )
         .replace(
-            /[&<>'"]/g,
-            character => ({
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                "'": "&#39;",
-                '"': "&quot;"
-            }[character])
+            /\\/g,
+            "\\\\"
+        )
+        .replace(
+            /'/g,
+            "\\'"
+        )
+        .replace(
+            /\r/g,
+            "\\r"
+        )
+        .replace(
+            /\n/g,
+            "\\n"
         );
 }
