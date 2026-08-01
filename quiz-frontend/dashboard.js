@@ -32,13 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    /*
-     * IMPORTANT:
-     * Never clear localStorage automatically here.
-     *
-     * If the role is temporarily unavailable or incorrect,
-     * keep the session so we can diagnose the problem.
-     */
+   
     if (currentRole !== "STUDENT") {
         console.error(
             "Unexpected account role:",
@@ -59,6 +53,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     await loadStudentData();
+});
+window.addEventListener("load", () => {
+    const nav = performance.getEntriesByType("navigation");
+
+    if (nav.length && nav[0].type === "reload") {
+        sessionStorage.clear();
+        window.location.replace("index.html");
+    }
 });
 
 
