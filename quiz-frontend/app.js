@@ -9,7 +9,14 @@ const dataCache = {
     dashboard: null,
     exams: {}
 };
+window.addEventListener("load", () => {
+    const nav = performance.getEntriesByType("navigation");
 
+    if (nav.length && nav[0].type === "reload") {
+        sessionStorage.clear();
+        window.location.replace("index.html");
+    }
+});
 
 // ======================================================
 // VIEW ROUTING
