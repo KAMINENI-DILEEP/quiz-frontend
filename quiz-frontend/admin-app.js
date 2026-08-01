@@ -41,6 +41,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     startAdminAutoRefresh();
 });
+window.addEventListener("load", () => {
+    const nav = performance.getEntriesByType("navigation");
+
+    if (nav.length && nav[0].type === "reload") {
+        sessionStorage.clear();
+        window.location.replace("index.html");
+    }
+});
 
 
 // ======================================================
